@@ -1,0 +1,31 @@
+﻿id_faq,kategori,pertanyaan,jawaban_acuan,id_operasional
+FAQ-001,Stok,"Ready, Kak?",Sebutkan nama atau SKU dan jumlah yang dibutuhkan. Ketersediaan mengikuti stok produk pada katalog dummy; stok nol berarti belum tersedia.,"OPS-021, OPS-022"
+FAQ-002,Produk,Ada ukuran apa saja?,Ukuran dan isi paket ada pada nama produk. Mohon sebutkan jenis produk agar kami dapat menyebutkan pilihan yang sesuai katalog.,OPS-023
+FAQ-003,Harga,Berapa harga produknya?,Harga satuan mengikuti kolom harga_jual untuk SKU yang dipilih. Total akhir dapat berubah karena promo dan ongkir di checkout.,"OPS-021, OPS-030"
+FAQ-004,Pengiriman,Bisa dikirim hari ini?,"Senin–Jumat pembayaran terverifikasi paling lambat 14.00 WIB; Sabtu paling lambat 12.00 WIB. Masuk antrean hari yang sama jika stok, packing, dan pickup memungkinkan.","OPS-009, OPS-010, OPS-012"
+FAQ-005,Pengiriman,Kalau pesan setelah batas jam bagaimana?,Pesanan masuk antrean hari pengiriman berikutnya. Sabtu lewat 12.00 atau Minggu masuk antrean Senin apabila tidak ada libur khusus.,"OPS-011, OPS-015"
+FAQ-006,Jadwal,Hari Minggu tetap kirim?,Pengiriman berjalan Senin–Sabtu. Minggu tidak ada pengiriman; checkout tetap bisa dilakukan.,"OPS-005, OPS-008"
+FAQ-007,Jadwal,CS online jam berapa?,CS melayani Senin–Sabtu pukul 08.00–17.00 WIB. Pesan di luar jam itu diperiksa saat CS kembali aktif.,OPS-006
+FAQ-008,Lokasi,Dikirim dari mana?,"Dalam data simulasi ini, paket dikirim dari Jakarta Timur, DKI Jakarta.",OPS-004
+FAQ-009,Pengiriman,Berapa ongkir ke kota saya?,"Ongkir mengikuti alamat, berat pesanan, kurir, dan program pada checkout. Masukkan alamat tujuan untuk melihat biaya yang tersedia.",OPS-027
+FAQ-010,Pengiriman,Paket sampai kapan?,"Estimasi tiba mengikuti informasi checkout dan pelacakan kurir. Toko dapat membantu memeriksa resi, tetapi tidak menjamin tanggal tiba.",OPS-027
+FAQ-011,Pengiriman,Bisa pakai instant atau same day?,Gunakan layanan yang muncul di checkout untuk alamat Anda. Toko tidak otomatis menyediakan instant atau menjamin layanan di semua daerah.,OPS-027
+FAQ-012,Pesanan,"Pesanan saya belum dikirim, kenapa?","Mohon nomor pesanan agar CS dapat mengecek pembayaran, stok, antrean packing, dan pickup. Waktu proses normal hingga 1 hari kerja pengiriman; saat ramai hingga 2 hari.","OPS-012, OPS-014, OPS-032"
+FAQ-013,Pesanan,"Resinya belum bergerak, bagaimana?",Mohon nomor pesanan dan status pelacakan terakhir. CS akan memeriksa penyerahan paket dan membantu meneruskan pengecekan; posisi paket tidak dapat ditebak.,"OPS-013, OPS-019, OPS-027"
+FAQ-014,Stok,Kapan restock?,"Tanggal restock belum ditetapkan. CS dapat mencatat produk yang dicari dan meminta pembaruan kepada gudang, tanpa menjanjikan tanggal.",OPS-022
+FAQ-015,Produk,Expired kapan?,Tanggal kedaluwarsa bergantung batch. Sebutkan produk atau SKU agar CS dapat meminta foto label dari gudang; katalog belum memuat tanggal tersebut.,OPS-024
+FAQ-016,Produk,Apakah sudah halal atau ada izin edar?,CS perlu memeriksa dokumen atau label produk yang dimaksud. Informasi sertifikasi dan izin edar belum tersedia dalam data dummy ini.,OPS-025
+FAQ-017,Produk,Ada kandungan susu atau kacang?,Komposisi dan peringatan alergen perlu diperiksa pada label produk per batch. CS tidak dapat memastikan keamanan konsumsi hanya dari nama produk.,"OPS-024, OPS-025"
+FAQ-018,Produk,Cara simpan makanan ini bagaimana?,Petunjuk penyimpanan perlu mengikuti label produk. Sebutkan SKU agar CS dapat meminta informasi label kepada gudang.,OPS-024
+FAQ-019,Packing,Packing-nya aman?,"Produk dikemas tertutup dengan pelindung sesuai jenisnya. Jika ada kebutuhan tambahan, sampaikan sebelum packing agar gudang dapat memeriksa.",OPS-026
+FAQ-020,Packing,Bisa tambah bubble wrap atau box?,Permintaan dapat dicatat sebelum packing. Ketersediaan dan biaya tambahan perlu dikonfirmasi gudang; belum ada tarif tetap pada data ini.,OPS-026
+FAQ-021,Pesanan,Bisa ubah alamat atau varian?,Mohon nomor pesanan serta perubahan yang diminta. CS perlu mengecek tahap packing dan opsi marketplace; perubahan belum tentu dapat dilakukan.,OPS-028
+FAQ-022,Pesanan,Bisa batalin pesanan?,Gunakan opsi pembatalan yang tersedia di marketplace. CS membantu memeriksa tahap pesanan; pengajuan belum berarti pembatalan sudah disetujui.,OPS-028
+FAQ-023,Keluhan,Barang saya rusak atau kurang.,"Mohon nomor pesanan, rincian barang, dan foto paket, label, serta produk bila tersedia. CS akan meneruskan pemeriksaan dan membantu pengajuan melalui marketplace.","OPS-019, OPS-029"
+FAQ-024,Keluhan,Barang yang datang salah.,Mohon nomor pesanan dan foto produk beserta label paket. CS akan mencocokkan pesanan dengan packing sebelum menentukan tindak lanjut.,"OPS-019, OPS-029"
+FAQ-025,Keluhan,Kalau tidak punya video unboxing bagaimana?,"Sampaikan bukti yang tersedia seperti foto paket, label, dan produk. CS akan membantu pemeriksaan melalui fitur marketplace; hasil pengajuan belum dapat dipastikan.",OPS-029
+FAQ-026,Keluhan,Kapan keluhan saya selesai?,Target pembaruan pertama paling lambat 1 hari kerja CS setelah informasi cukup. Waktu penyelesaian bergantung pemeriksaan serta proses marketplace.,OPS-020
+FAQ-027,Pembayaran,Bisa COD?,"COD dapat digunakan bila muncul pada checkout untuk akun, alamat, dan produk Anda. Toko tidak bisa mengaktifkannya secara manual untuk semua pesanan.",OPS-030
+FAQ-028,Promo,Kenapa voucher atau gratis ongkir tidak bisa dipakai?,"Ketersediaan mengikuti syarat program yang tampil pada marketplace. Periksa minimum belanja, masa berlaku, produk, akun, dan pilihan kurir di checkout.",OPS-030
+FAQ-029,Grosir,Beli banyak dapat diskon?,"Pembelian minimal 20 kemasan bisa diajukan ke admin untuk cek stok dan penawaran. Sebutkan SKU, jumlah, dan tanggal kebutuhan; diskon belum ditetapkan.",OPS-031
+FAQ-030,Pembayaran,Boleh transfer langsung ke penjual?,Pembayaran dilakukan melalui metode resmi yang tersedia pada checkout marketplace. CS tidak meminta transfer ke rekening pribadi atau kode OTP.,"OPS-030, OPS-032"

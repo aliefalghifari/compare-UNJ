@@ -1,0 +1,43 @@
+DATA DUMMY LAYANAN PELANGGAN TOKO HUSIN
+
+Cakupan
+100 percakapan, 287 pesan, 30 FAQ, dan 32 aturan operasional. Seluruh chat, identitas, dan aturan tambahan merupakan simulasi.
+
+Periode
+Chat dibuat untuk 19–25 Oktober 2026. Seluruh waktu memakai WIB. Ini sampel latihan, bukan seluruh chat harian toko.
+
+Asal data
+Profil usaha mengacu pada keterangan pengguna. SKU, nama, harga, dan stok mengacu pada data_dummy_produk_husin.csv yang dibuat sebelumnya. Kebijakan detail adalah asumsi dummy.
+
+Stok
+Katalog diperlakukan sebagai snapshot tetap selama simulasi chat. Chat bukan transaksi dan tidak otomatis mengurangi stok. Tidak ada riwayat mutasi persediaan dalam paket ini.
+
+Nomor pesanan
+Nomor chat-sim-xxx hanyalah referensi fiktif di dalam percakapan, bukan kunci ke laporan transaksi dummy sebelumnya. Status pesanan dan resi tidak disediakan.
+
+Baris chat
+Satu baris = satu pesan. Kelompokkan id_percakapan lalu urutkan urutan atau waktu_wib untuk membaca percakapan. CSV memakai tanggal teks ISO; waktu Excel berupa nilai tanggal/jam.
+
+Konteks SKU
+sku_konteks adalah produk yang dibuka saat chat jika diketahui. Nilai kosong berarti konteks produk tidak tercatat, bukan berarti SKU tidak valid.
+
+Balasan CS
+Balasan adalah riwayat simulasi, bukan kunci jawaban atau label evaluasi. Beberapa masalah belum selesai dan 10 percakapan belum mendapat balasan CS.
+
+Lampiran
+Teks [Lampiran simulasi: ...] hanya deskripsi. Paket ini tidak memuat foto, resi aktif, akun, nomor telepon, atau dokumen pelanggan asli.
+
+FAQ dan operasi
+FAQ berisi pertanyaan umum dan jawaban acuan. Kolom id_operasional mengacu ke id_operasional pada tabel operasional; beberapa referensi dipisahkan koma.
+
+Batas informasi
+Label batch, sertifikasi, alergen, restock, diskon grosir, dan status pesanan belum tersedia. Informasi yang belum ada harus dikonfirmasi, tidak diasumsikan.
+
+Kanal
+Ketiga marketplace menggunakan kebijakan internal toko yang sama dalam simulasi. Fitur pembayaran, ongkir, retur, dan promo bergantung tampilan kanal, bukan aturan resmi platform yang ditetapkan di sini.
+
+Format CSV
+UTF-8 BOM, pemisah koma, header pada baris pertama. Teks yang mengandung koma atau tanda kutip dikutip sesuai format CSV.
+
+Identitas
+id_percakapan mengidentifikasi percakapan; id_pelanggan adalah identitas fiktif yang terpisah dari nama pembeli pada laporan transaksi. pengirim berisi pelanggan atau cs.

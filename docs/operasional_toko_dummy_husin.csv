@@ -1,0 +1,33 @@
+﻿id_operasional,kategori,parameter,ketentuan,cakupan
+OPS-001,Profil,Nama dan pemilik,"Toko Husin Dummy, milik Husin. Nama toko merupakan nama simulasi.",Semua kanal
+OPS-002,Profil,Kanal penjualan,"Shopee, TikTok Shop, dan Lazada. Toko melayani pembelian online.",Semua kanal
+OPS-003,Waktu,Zona waktu,"Semua jam operasional dan waktu chat menggunakan WIB (Asia/Jakarta, UTC+7).",Semua kanal
+OPS-004,Profil,Lokasi pengiriman,"Jakarta Timur, DKI Jakarta. Kota asal ini merupakan asumsi dummy.",Semua kanal
+OPS-005,Jadwal,Penerimaan pesanan,Checkout dapat dilakukan 24 jam setiap hari. Pemrosesan mengikuti jam kerja toko.,Semua kanal
+OPS-006,Jadwal,Jam CS,Senin–Sabtu pukul 08.00–17.00 WIB. Minggu dan tanggal libur khusus toko tidak ada CS aktif.,Semua kanal
+OPS-007,Jadwal,Jam packing,Senin–Sabtu pukul 08.00–16.00 WIB.,Semua kanal
+OPS-008,Pengiriman,Hari pengiriman,Senin–Sabtu. Tidak ada pengiriman pada Minggu dan tanggal libur khusus toko.,Semua kanal
+OPS-009,Pengiriman,Batas Senin–Jumat,Pembayaran terverifikasi paling lambat pukul 14.00 WIB dapat masuk antrean kirim hari yang sama.,"Bersyarat stok, antrean, dan kurir"
+OPS-010,Pengiriman,Batas Sabtu,Pembayaran terverifikasi paling lambat pukul 12.00 WIB dapat masuk antrean kirim Sabtu.,"Bersyarat stok, antrean, dan kurir"
+OPS-011,Pengiriman,Lewat batas waktu,"Pesanan setelah batas waktu masuk antrean hari pengiriman berikutnya. Sabtu setelah 12.00 dan Minggu masuk antrean Senin, jika tidak libur khusus.",Semua kanal
+OPS-012,Pengiriman,Syarat kirim hari yang sama,"Stok tersedia, pembayaran terverifikasi, data pesanan lengkap, kapasitas packing cukup, dan pickup kurir berhasil. Kirim hari yang sama tidak dijamin.",Semua kanal
+OPS-013,Pengiriman,Pickup kurir,Target pickup pukul 16.00 WIB pada hari pengiriman. Keterlambatan atau kegagalan pickup dapat menunda keberangkatan.,Target operasional dummy
+OPS-014,Pengiriman,Estimasi proses,"Normal paling lambat 1 hari kerja pengiriman setelah verifikasi pembayaran. Saat lonjakan, hingga 2 hari kerja pengiriman.",Hari kerja pengiriman: Senin–Sabtu
+OPS-015,Jadwal,Libur khusus,Tanggal penutupan tambahan mengikuti pengumuman toko. Dalam sampel 19–25 Oktober 2026 tidak ada penutupan tambahan selain Minggu.,Asumsi kalender simulasi
+OPS-016,Kapasitas,Volume dan kapasitas,Pesanan normal 500–700 per hari dan dapat mencapai 1.000. Kapasitas packing simulasi 700 pesanan per hari; sisanya dapat mengantre.,Angka kapasitas adalah asumsi
+OPS-017,Layanan,Waktu respons CS,Target respons awal 15 menit selama jam CS. Saat ramai dapat lebih lama; target ini bukan jaminan.,Antrean chat gabungan
+OPS-018,Layanan,Pembagian pekerjaan,"2 CS menangani tiga marketplace, 1 admin menangani kampanye, 6 petugas packing, dan Husin menyetujui kasus khusus.",Jumlah pegawai adalah asumsi
+OPS-019,Layanan,Penanganan keluhan,"CS mencatat nomor pesanan, ringkasan masalah, dan bukti yang tersedia. Kasus barang kurang, rusak, salah, atau tagihan diteruskan ke admin terkait.",Semua kanal
+OPS-020,Layanan,Tindak lanjut keluhan,Target pembaruan pertama paling lambat 1 hari kerja CS setelah informasi cukup. Penyelesaian mengikuti hasil pemeriksaan dan proses marketplace.,Bukan jaminan penyelesaian
+OPS-021,Stok,Sumber stok dan harga,"Gunakan data_dummy_produk_husin.csv. Satu unit berarti satu kemasan atau paket sesuai nama produk. Nilai stok adalah snapshot latihan, bukan stok langsung.",Semua SKU
+OPS-022,Stok,Stok habis dan restock,Stok nol berarti belum tersedia pada snapshot. Tanggal restock belum ditetapkan; CS tidak menjanjikan tanggal atau menerima pre-order.,SKU stok nol
+OPS-023,Produk,Pilihan ukuran,Ukuran dan isi paket mengikuti nama produk di katalog. Produk dengan SKU berbeda adalah varian terpisah.,Semua SKU
+OPS-024,Produk,Kedaluwarsa dan batch,"Tanggal kedaluwarsa, nomor batch, komposisi, dan petunjuk simpan tidak tersedia dalam katalog. CS perlu meminta foto label kepada gudang.",Produk makanan
+OPS-025,Produk,Sertifikasi dan alergen,"Status sertifikasi halal, izin edar, dan rincian alergen perlu bukti label atau dokumen per produk. Jangan menyimpulkan dari nama atau negara produk.",Produk makanan
+OPS-026,Packing,Pengemasan,Makanan dikemas tertutup dan diberi pelindung sesuai jenis produk. Permintaan tambahan dicatat untuk diperiksa gudang; ketersediaan dan biaya belum ditetapkan.,Semua kanal
+OPS-027,Pengiriman,"Ongkir, kurir, dan estimasi tiba","Pilihan kurir, ongkir, layanan, serta estimasi tiba mengikuti yang tampil saat checkout. Toko tidak menjamin tanggal tiba atau menyediakan instant secara otomatis.",Semua kanal
+OPS-028,Pesanan,Perubahan dan pembatalan,Permintaan perlu pemeriksaan tahap packing serta opsi pada marketplace. Tidak otomatis disetujui. Pesanan yang sudah diserahkan ke kurir tidak bisa diubah langsung oleh toko.,Semua kanal
+OPS-029,Keluhan,Pengembalian dan refund,"Pengajuan dilakukan melalui fitur marketplace dengan bukti yang tersedia. Foto paket, label, dan produk membantu pemeriksaan; video bila ada. Persetujuan dan nominal belum pasti sebelum pemeriksaan.",Tanpa janji otomatis atau tenggat platform buatan
+OPS-030,Pembayaran,"Pembayaran, COD, dan promosi","Gunakan metode pembayaran serta promo yang muncul di checkout. COD, voucher, gratis ongkir, dan cicilan tergantung akun, alamat, produk, serta program pada kanal tersebut.",Tidak meminta transfer di luar marketplace
+OPS-031,Penjualan,Pembelian banyak,Permintaan minimal 20 kemasan dapat diajukan ke admin untuk cek stok dan penawaran. Tidak ada diskon grosir tetap atau jaminan stok tambahan.,Semua kanal
+OPS-032,Layanan,Data pelanggan,"Minta nomor pesanan di chat resmi jika diperlukan. Jangan meminta OTP, PIN, kata sandi, atau mengarahkan pembayaran ke rekening pribadi.",Semua kanal
