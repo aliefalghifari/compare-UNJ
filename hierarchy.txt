@@ -1,0 +1,91 @@
+customer-service/
+│
+├── backend/
+│   │
+│   ├── app/
+│   │   ├── main.py
+│   │   │
+│   │   ├── api/
+│   │   │   ├── __init__.py
+│   │   │   └── routes/
+│   │   │       ├── __init__.py
+│   │   │       └── prediction.py
+│   │   │
+│   │   ├── models/
+│   │   │   ├── __init__.py
+│   │   │   ├── intent/
+│   │   │   │   ├── model.py
+│   │   │   │   └── config.json
+│   │   │   │
+│   │   │   └── entity/
+│   │   │       ├── model.py
+│   │   │       └── config.json
+│   │   │
+│   │   ├── services/
+│   │   │   ├── __init__.py
+│   │   │   ├── intent_service.py
+│   │   │   ├── entity_service.py
+│   │   │   └── prediction_service.py
+│   │   │
+│   │   ├── core/
+│   │   │   ├── __init__.py
+│   │   │   └── config.py
+│   │   │
+│   │   ├── schemas/
+│   │   │   ├── __init__.py
+│   │   │   └── prediction.py
+│   │   │
+│   │   └── utils/
+│   │       └── ...
+│   │
+│   ├── artifacts/
+│   │   ├── intent_classifier/
+│   │   │   ├── config.json
+│   │   │   ├── model.safetensors
+│   │   │   ├── tokenizer.json
+│   │   │   ├── tokenizer_config.json
+│   │   │   └── ...
+│   │   │
+│   │   └── entity_extractor/
+│   │       ├── config.json
+│   │       ├── model.safetensors
+│   │       ├── tokenizer.json
+│   │       ├── tokenizer_config.json
+│   │       └── ...
+│   │
+│   ├── requirements.txt
+│   └── .env
+│
+├── lab/
+│   │
+│   ├── data/
+│   │   ├── intent/
+│   │   │   └── synthetic_generated.csv
+│   │   │
+│   │   └── entity/
+│   │       └── entity_dataset.csv
+│   │
+│   ├── intent/
+│   │   ├── dataparser.py
+│   │   ├── processed.py
+│   │   ├── dataset.py
+│   │   ├── model.py
+│   │   ├── train.py
+│   │   └── evaluate.py
+│   │
+│   ├── entity/
+│   │   ├── dataparser.py
+│   │   ├── processed.py
+│   │   ├── dataset.py
+│   │   ├── model.py
+│   │   ├── train.py
+│   │   └── evaluate.py
+│   │
+│   └── experiments/
+│       └── ...
+│
+├── frontend/
+│   └── ...
+│
+├── .gitignore
+└── README.md
