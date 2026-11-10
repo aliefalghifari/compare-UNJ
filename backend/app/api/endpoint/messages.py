@@ -1,7 +1,11 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, status
+from app.schema.message import (MessageCreate, MessageResponse)
 
 router = APIRouter()
 
-@router.get("/messages")
-def get_messages():
-    return {"messages":"the API is working"}
+@router.post("/", status_code=status.HTTP_201_CREATED)
+async def create_message(payload: MessageCreate):
+
+    return MessageResponse(
+        message=payload.message
+    )
