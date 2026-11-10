@@ -26,11 +26,13 @@ export interface Message {
   id: string;
   senderId: string;
   senderName: string;
-  senderRole: UserRole;
+  senderRole: "customer" | "cs" | "agent" | "system";
   text: string;
   timestamp: string;
-  isIncoming: boolean; // relative to the current perspective
+  isIncoming: boolean; // Incoming = from customer / external; false = from user / CS / assistant
   status: MessageStatus;
+  detectedIntent?: string;
+  detectedEntities?: { label: string; value: string }[];
   attachment?: {
     type: "product" | "image" | "file";
     product?: MessageProductAttachment;
@@ -40,19 +42,26 @@ export interface Message {
 }
 
 export type PlatformType = "Shopee" | "TikTok Shop" | "Lazada" | "WhatsApp";
+export type ChatPriority = "high" | "medium" | "low";
+export type ChatStatus = "active" | "resolved";
+export type SortOption = "priority" | "newest" | "oldest" | "date";
 
-export interface ChatContact {
+export interface ChatSession {
   id: string;
-  name: string;
-  avatar: string;
+  title: string;
+  customerName: string;
+  customerAvatar: string;
   platform: PlatformType;
   platformBadgeColor: string;
+  priority: ChatPriority;
+  status: ChatStatus;
   isOnline: boolean;
-  statusText: string;
   unreadCount: number;
   pinned?: boolean;
   lastMessage: string;
   lastMessageTime: string;
+  createdAt: string; // ISO string or timestamp
+  updatedAt: string;
   messages: Message[];
   orderInfo?: {
     orderId: string;
@@ -60,5 +69,8 @@ export interface ChatContact {
     totalAmount: string;
     status: string;
   };
+  tags?: string[];
 }
 
+// Backward compatibility alias
+export type ChatContact = ChatSession;
