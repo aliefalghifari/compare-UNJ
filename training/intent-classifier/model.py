@@ -1,53 +1,18 @@
+import torch.nn as nn
+from transformers import AutoModel
 
-import torch
-from transformers import AutoModelForSequenceClassification
+class IntentClassifier(nn.Module):
+    def __init__(self, model_name:str, num_labels:int, dropout:float=0.1):
+        super().__init__()
+        self.encoder = AutoModel.from_pretrained(model_name)
+        hidden_size = self.encoder.config.hidden_size
+        self.dropout = nn.Dropout(dropout)
+        self.classifier = nn.Linear(hidden_size, num_labels)
 
-MODEL_NAME = "indobenchmark/indobert-base-p1"
+    def forward(self, input_ids, attention_mask):
+        outputs = self.encoder(input_ids=input_ids, attention_mask=attention_mask)
+        cls_output = outputs.last_hidden_state[:, 0, :]
+        cls_output = self.dropout(cls_output)
+        logits = self.classifier(cls_output)
+        return logits
 
-NUM_LABELS = 9
-
-LABEL_COLUMNS = [
-    "product_inquiry",
-    "order_status",
-    "payment_issue",
-    "refund_request",
-    "product_complaint",
-    "order_cancellation",
-    "address_change",
-    "shipping_schedule",
-    "shipping_issue",
-]
-
-
-def build_model():
-    model = AutoModelForSequenceClassification.from_pretrained(
-        MODEL_NAME,
-        num_labels=NUM_LABELS,
-        problem_type="multi_label_classification",
-        id2label={
-            i: label for i, label in enumerate(LABEL_COLUMNS)
-        },
-        label2id={
-            label: i for i, label in enumerate(LABEL_COLUMNS)
-        },
-    )
-
-    return model
-
-
-if __name__ == "__main__":
-    model = build_model()
-
-    print(model.config)
-    print("\nModel loaded successfully!")
-
-    # Dummy input for architecture testing
-    input_ids = torch.randint(0, 1000, (2, 128))
-    attention_mask = torch.ones((2, 128), dtype=torch.long)
-
-    outputs = model(
-        input_ids=input_ids,
-        attention_mask=attention_mask,
-    )
-
-    print("\nLogits shape:", outputs.logits.shape)
