@@ -15,10 +15,3 @@
 
 # IDE
 .vscode/
-# Model artifacts
-*.pth
-*.pt
-*.safetensors
-
-# Saved models
-training/**/saved_model/

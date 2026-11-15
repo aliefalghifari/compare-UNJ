@@ -1,11 +1,15 @@
 from fastapi import FastAPI
-from app.api.router import api_router
-app = FastAPI()
+from contextlib import asynccontextmanager
+from app.models.model_loader import IntentModelLoader
 
-app.include_router(
-    api_router,
-    prefix="/api",
-    tags=["api"]
+@asynccontextmanager
+async def lifespan(app:FastAPI):
+    loader = IntentModelLoader
+    model,tokenizer=loader.load_intent_model()
+    app.state.intent_model = model
+    app.state.intent_tokenizer = tokenizer
+    yield
+    app.state.intent_model = None
+    app.state.intent_tokenizer = None
 
-)
-
+app = FastAPI(lifespan=lifespan)

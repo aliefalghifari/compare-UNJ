@@ -7,6 +7,7 @@ from pathlib import Path
 import pandas as pd
 from transformers import AutoModel
 from transformers import AutoTokenizer
+from safetensors.torch import save_file
 
 class Train:
     def __init__(self,train_loader,Val_loader,model,device):
