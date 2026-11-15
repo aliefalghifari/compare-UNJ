@@ -15,3 +15,11 @@
 
 # IDE
 .vscode/
+
+# Model artifacts
+*.pth
+*.pt
+*.safetensors
+
+# Model directories
+saved_model/
