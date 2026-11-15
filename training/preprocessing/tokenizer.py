@@ -7,6 +7,7 @@ class DataProcess:
 
     #mengubah teks menjadi token
     def process_text(self, texts):
+        texts = texts.tolist()
         encoded = self.tokenizer(
             texts,
             truncation=True,
@@ -21,7 +22,8 @@ class DataProcess:
 
     #mengubah label menjadi token
     def process_labels(self, labels):
-        return torch.tensor(labels, dtype=torch.float32)
+        labels = labels.to_numpy().argmax(axis=1)
+        return torch.tensor(labels, dtype=torch.long)
 
     #mengubah teks dan label menjadi token
     def process_token(self, texts, labels):
