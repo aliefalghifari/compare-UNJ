@@ -17,7 +17,9 @@ class EntityDataProcess:
             "B-TIME":9,
             "I-TIME":10,
             "B-ADDRESS":11,
-            "I-ADDRESS":12
+            "I-ADDRESS":12,
+            "B-PRICE":13,
+            "I-PRICE":14
         }
     def process_token(self,samples):
         text = [sample["text"] for sample in samples]

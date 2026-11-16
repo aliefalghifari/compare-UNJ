@@ -4,7 +4,7 @@ from pathlib import Path
 
 class DataSplitter:
     def __init__(self):
-        self.dataset = pd.read_csv(Path("intent_classifier/data.csv"))
+        self.dataset = pd.read_csv(Path("entity/entity_dataset (1).jsonl"))
 
     def split(self):
         X = self.dataset["message"]
