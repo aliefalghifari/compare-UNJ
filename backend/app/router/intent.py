@@ -1,5 +1,5 @@
 from fastapi import APIRouter,Request
-from app.schema.message import IntentRequest,IntentResponse
+from backend.app.schema.message import IntentRequest,IntentResponse
 
 router = APIRouter(prefix="/intent",tags=["Intent"])
 

@@ -1,6 +1,6 @@
 import torch
 from transformers import AutoTokenizer
-from app.models.intent_model import IntentClassifier
+from backend.app.models.intent_model import IntentClassifier
 from huggingface_hub import hf_hub_download
 from safetensors.torch import load_file
 

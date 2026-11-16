@@ -1,5 +1,5 @@
 from app.models.model_loader import IntentModelLoader
-from services.inference_service import IntentInference
+from backend.services.intent_inference import IntentInference
 
 
 def main():

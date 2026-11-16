@@ -1,0 +1,17 @@
+{
+  "0": "O",
+  "1": "B-PRODUCT",
+  "2": "I-PRODUCT",
+  "3": "B-QUANTITY",
+  "4": "I-QUANTITY",
+  "5": "B-ORDER_ID",
+  "6": "I-ORDER_ID",
+  "7": "B-DATE",
+  "8": "I-DATE",
+  "9": "B-TIME",
+  "10": "I-TIME",
+  "11": "B-ADDRESS",
+  "12": "I-ADDRESS",
+  "13": "B-PRICE",
+  "14": "I-PRICE"
+}

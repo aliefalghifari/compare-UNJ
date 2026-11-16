@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from app.models.model_loader import IntentModelLoader
-from services.inference_service import IntentInference
-from app.router.intent import router as intent_router
+from backend.app.models.model_loader import IntentModelLoader
+from backend.services.intent_inference import IntentInference
+from backend.app.router.intent import router as intent_router
 
 
 @asynccontextmanager
