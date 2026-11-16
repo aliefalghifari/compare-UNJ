@@ -1,12 +1,10 @@
 from pydantic import BaseModel, Field
 
 
-class MessageCreate(BaseModel):
-    message: str = Field(
-        min_length=1,
-        description="Customer message"
-    )
+class IntentRequest(BaseModel):
+    message: str = Field(min_length=1)
 
-class MessageResponse(BaseModel):
-    message : str
-    status: str
+class IntentResponse(BaseModel):
+    predicted_class : int
+    intent: str
+    confidence: float

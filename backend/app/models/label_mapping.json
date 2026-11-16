@@ -1,0 +1,11 @@
+{
+    "0": "product_inquiry",
+    "1": "order_status",
+    "2": "payment_issue",
+    "3": "refund_request",
+    "4": "product_complaint",
+    "5": "order_cancellation",
+    "6": "address_change",
+    "7": "shipping_schedule",
+    "8": "shipping_issue"
+}

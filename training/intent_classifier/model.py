@@ -11,8 +11,8 @@ class IntentClassifier(nn.Module):
 
     def forward(self, input_ids, attention_mask):
         outputs = self.encoder(input_ids=input_ids, attention_mask=attention_mask)
-        cls_output = outputs.last_hidden_state[:, 0, :]
-        cls_output = self.dropout(cls_output)
-        logits = self.classifier(cls_output)
+        hidden_states = outputs.last_hidden_state
+        hidden_states = self.dropout(hidden_states)
+        logits = self.classifier(hidden_states)
         return logits
 

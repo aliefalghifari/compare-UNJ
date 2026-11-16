@@ -15,9 +15,9 @@ class IntentModelLoader:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         tokenizer = AutoTokenizer.from_pretrained(self.REPO_NAME)
         model = IntentClassifier(model_name=self.BASE_MODEL,num_labels=9,dropout=0.1)
-        weight = hf_hub_download(repo_id=self.REPO_NAME, filename="model.safetensor")
+        weight = hf_hub_download(repo_id=self.REPO_NAME, filename="model.safetensors")
         state_dict = load_file(weight,device="cpu")
         model.load_state_dict(state_dict)
-        model.to(device)
+        model.to(self.device)
         model.eval()
         return model,tokenizer

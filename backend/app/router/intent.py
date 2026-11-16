@@ -1,8 +1,10 @@
 from fastapi import APIRouter,Request
+from app.schema.message import IntentRequest,IntentResponse
 
 router = APIRouter(prefix="/intent",tags=["Intent"])
 
-@router.post("/predict")
-async def predict_intent(request:Request):
-    model = request.app.state.intent_model
-    tokenizer = request.app.state.intent_tokenizer
+@router.post("/predict",response_model=IntentResponse)
+async def predict_intent(payload:IntentRequest,request:Request):
+    inference = request.app.state.intent_inference
+    result = inference.predict(payload.message)
+    return result
