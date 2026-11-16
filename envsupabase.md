@@ -1,0 +1,7 @@
+SUPABASE_URL=https://naaqlrghezshrxctqlkj.supabase.co
+SUPABASE_PUBLISHABLE_KEY=sb_publishable_ykgldbYXFgtjlUlgcUrNsw_3LuN7iPS
+SUPABASE_SECRET_KEY=sb_secret_MPqrcgknaLNLFdIEFbs20w_CQD7p4jz
+SUPABASE_JWKS_URL=https://naaqlrghezshrxctqlkj.supabase.co/auth/v1/.well-known/jwks.json
+
+COMPARE
+comparediayamin

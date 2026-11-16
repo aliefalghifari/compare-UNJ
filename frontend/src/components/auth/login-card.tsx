@@ -4,7 +4,8 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useApp } from "@/context/app-context";
 import { UserRole } from "@/types";
-import { MessageSquare, Sun, Moon } from "lucide-react";
+import { MessageSquare } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface LoginCardProps {
   onSuccess?: () => void;
@@ -12,7 +13,7 @@ interface LoginCardProps {
 
 export function LoginCard({ onSuccess }: LoginCardProps) {
   const router = useRouter();
-  const { login, theme, toggleTheme } = useApp();
+  const { login } = useApp();
 
   const [email, setEmail] = useState("cs.ahmad@husinherbal.com");
   const [password, setPassword] = useState("••••••••");
@@ -50,14 +51,7 @@ export function LoginCard({ onSuccess }: LoginCardProps) {
     <div className="w-full max-w-sm mx-auto">
       {/* Top Bar with Theme Toggle */}
       <div className="flex justify-end mb-3">
-        <button
-          type="button"
-          onClick={toggleTheme}
-          className="p-2 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors"
-          title={theme === "light" ? "Ganti ke Tema Gelap" : "Ganti ke Tema Terang"}
-        >
-          {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-        </button>
+        <ThemeToggle />
       </div>
 
       {/* Main Card */}

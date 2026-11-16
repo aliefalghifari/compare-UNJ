@@ -23,13 +23,12 @@ import {
   CircleDot,
   Pencil,
   Trash2,
-  Sun,
-  Moon,
   MessageSquare,
   Sparkles,
 } from "lucide-react";
 import { ChatPriority, ChatSession, SortOption } from "@/types";
 import { confirmDeleteChat, confirmStatusChange, promptRenameChat } from "@/lib/alerts";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface SidebarInboxProps {
   onSelectChat?: () => void;
@@ -38,8 +37,6 @@ interface SidebarInboxProps {
 
 export function SidebarInbox({ onSelectChat }: SidebarInboxProps) {
   const {
-    theme,
-    toggleTheme,
     currentUser,
     activeChatId,
     setActiveChatId,
@@ -130,15 +127,8 @@ export function SidebarInbox({ onSelectChat }: SidebarInboxProps) {
           </div>
         </div>
 
-        {/* Theme Toggle Button */}
-        <button
-          type="button"
-          onClick={toggleTheme}
-          title={theme === "light" ? "Ganti ke Tema Gelap" : "Ganti ke Tema Terang"}
-          className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-        >
-          {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-        </button>
+        {/* Theme Toggle Button (Hydration-safe) */}
+        <ThemeToggle />
       </div>
 
       {/* 2. Tombol "New Chat / Sesi Baru" */}
