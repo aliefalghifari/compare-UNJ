@@ -1,0 +1,25 @@
+# Python
+**/.venv/
+**/venv/
+**/__pycache__/
+*.py[cod]
+
+# Node
+**/node_modules/
+**/.next/
+**/dist/
+
+# Environment
+.env
+.env.*
+
+# IDE
+.vscode/
+
+# Model artifacts
+*.pth
+*.pt
+*.safetensors
+
+# Model directories
+saved_model/
