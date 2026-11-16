@@ -23,3 +23,6 @@
 
 # Model directories
 saved_model/
+
+# Windows metadata / Alternate Data Streams
+*:Zone.Identifier
