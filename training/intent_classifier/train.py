@@ -8,6 +8,7 @@ import pandas as pd
 from transformers import AutoModel
 from transformers import AutoTokenizer
 from safetensors.torch import save_file
+import json
 
 class Train:
     def __init__(self,train_loader,Val_loader,model,device):
@@ -15,34 +16,36 @@ class Train:
         self.val_loader = Val_loader
         self.device = device
         self.model = model.to(self.device)
-        self.optimizer = torch.optim.AdamW(model.parameters(), lr=2e-5)
-        self.criterion = torch.nn.CrossEntropyLoss()
+        self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=2e-5)
+        self.criterion = torch.nn.BCEWithLogitsLoss()
         
 
     def training_step(self):
         self.model.train()
-        total_loss = 0
-        for batch in self.train_loader:
-            input_ids, attention_mask, labels = [tensor.to(self.device) for tensor in batch]
-            self.optimizer.zero_grad()
-            outputs = self.model(input_ids, attention_mask)
-            loss = self.criterion(outputs, labels)
-            total_loss += loss.item()
+        total_loss = 0.0
+        for  input_ids, attention_mask, labels in self.train_loader:
+            input_ids, attention_mask = input_ids.to(self.device), attention_mask.to(self.device)
+            labels = labels.to(self.device,dtype=torch.float32)
+            self.optimizer.zero_grad(set_to_none=True)
+            logits = self.model(input_ids, attention_mask)
+            loss = self.criterion(logits, labels)
             loss.backward()
             self.optimizer.step()
+            total_loss += loss.item()
         return total_loss / len(self.train_loader)
 
     def validating_step(self):
         self.model.eval()
-        total_loss = 0
-        with torch.no_grad():
-            for batch in self.val_loader:
-                input_ids, attention_mask, labels = [tensor.to(self.device) for tensor in batch]
-                outputs = self.model(input_ids, attention_mask)
-                loss = self.criterion(outputs, labels)
-                total_loss += loss.item()
+        total_loss = 0.0
+        with torch.inference_mode():
+                    for input_ids, attention_mask, labels in self.val_loader:
+                        input_ids, attention_mask = input_ids.to(self.device), attention_mask.to(self.device)
+                        labels = labels.to(self.device,dtype=torch.float32)
+                        self.optimizer.zero_grad(set_to_none=True)
+                        logits = self.model(input_ids, attention_mask)
+                        loss = self.criterion(logits, labels)
+                        total_loss += loss.item()
         return total_loss / len(self.val_loader)
-
     def fit(self, epochs):
         for epoch in range(epochs):
             train_loss = self.training_step()
@@ -65,6 +68,18 @@ if __name__ == "__main__":
     trainer.fit(3)
     save_dir = Path(__file__).resolve().parent / "saved_model"
     save_dir.mkdir(parents=True,exist_ok=True)
-    torch.save(trainer.model.state_dict(),save_dir/"intent_classifier_weight.pth")
+    save_file(
+    {key: value.detach().cpu().contiguous()
+    for key, value in trainer.model.state_dict().items()},
+    str(save_dir / "intent_classifier_weight.safetensors"))
     tokenizer.save_pretrained(save_dir/"tokenizer")
+    config = {
+    "model_name": "indobenchmark/indobert-base-p1",
+    "num_labels": 9,
+    "dropout": 0.1,
+    "labels": list(y_train.columns)
+}
+
+    with open(save_dir / "config.json", "w") as f:
+        json.dump(config, f, indent=4)
     print("model berhasil dimuat")
