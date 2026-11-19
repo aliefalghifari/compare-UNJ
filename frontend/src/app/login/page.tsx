@@ -12,7 +12,7 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="w-full h-screen flex items-center justify-center p-4 bg-[#f0f2f5] dark:bg-[#111b21] overflow-hidden">
+    <main className="flex h-[100dvh] min-h-0 w-full items-center justify-center overflow-y-auto bg-[#f0f2f5] p-3 dark:bg-[#111b21] sm:p-4">
       <LoginCard onSuccess={handleLoginSuccess} />
     </main>
   );

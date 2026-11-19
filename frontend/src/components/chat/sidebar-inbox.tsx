@@ -45,13 +45,72 @@ interface SidebarInboxProps {
   onLogoutClick?: () => void;
 }
 
+function PlatformSourceSubmenu({
+  session,
+  onSelect,
+}: {
+  session: ChatSession;
+  onSelect: (id: string, platform: PlatformType) => void;
+}) {
+  const [open, setOpen] = React.useState(false);
+  const [position, setPosition] = React.useState<{ top: number; left: number } | null>(null);
+
+  const toggle = (trigger: HTMLButtonElement) => {
+    if (open) {
+      setOpen(false);
+      setPosition(null);
+      return;
+    }
+
+    const bounds = trigger.getBoundingClientRect();
+    const menuWidth = 168;
+    const menuHeight = CHAT_PLATFORMS.length * 32 + 12;
+    setPosition({
+      top: Math.max(8, Math.min(bounds.top, window.innerHeight - menuHeight - 8)),
+      left: Math.min(bounds.right + 6, window.innerWidth - menuWidth - 8),
+    });
+    setOpen(true);
+  };
+
+  return (
+    <>
+      <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={(event) => toggle(event.currentTarget)}
+        className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-xs text-slate-700 outline-none transition-colors hover:bg-slate-100 focus-visible:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 dark:focus-visible:bg-slate-800"
+      >
+        <span>Sumber platform</span>
+        <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+      </button>
+      {open && position && typeof document !== "undefined" && createPortal(
+        <div
+          role="menu"
+          aria-label="Pilih sumber platform"
+          onMouseDown={(event) => event.stopPropagation()}
+          onClick={(event) => event.stopPropagation()}
+          style={{ top: position.top, left: position.left }}
+          className="fixed z-[10000] max-h-[calc(100vh-16px)] w-[168px] overflow-y-auto rounded-xl border border-slate-200 bg-white p-1.5 text-slate-900 shadow-xl dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+        >
+          {CHAT_PLATFORMS.map((platform) => (
+            <DropdownMenuItem
+              key={platform}
+              onClick={() => onSelect(session.id, platform)}
+              className={`justify-between px-2.5 py-1.5 text-[11px] ${session.platform === platform ? "bg-slate-100 font-semibold text-slate-900 dark:bg-slate-800 dark:text-slate-100" : "text-slate-600 dark:text-slate-300"}`}
+            >
+              {platform}
+              {session.platform === platform && <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />}
+            </DropdownMenuItem>
+          ))}
+        </div>,
+        document.body
+      )}
+    </>
+  );
+}
+
 export function SidebarInbox({ onSelectChat }: SidebarInboxProps) {
-  const [openPlatformSubmenu, setOpenPlatformSubmenu] = React.useState<string | null>(null);
-  const [platformSubmenuPosition, setPlatformSubmenuPosition] = React.useState<{ top: number; left: number } | null>(null);
-  const closePlatformSubmenu = React.useCallback(() => {
-    setOpenPlatformSubmenu(null);
-    setPlatformSubmenuPosition(null);
-  }, []);
   const {
     currentUser,
     activeChatId,
@@ -80,17 +139,6 @@ export function SidebarInbox({ onSelectChat }: SidebarInboxProps) {
     newest: "Terbaru",
     oldest: "Terlama",
     date: "Tanggal dibuat",
-  };
-
-  const showPlatformSubmenu = (sessionId: string, trigger: HTMLButtonElement) => {
-    const bounds = trigger.getBoundingClientRect();
-    const menuWidth = 168;
-    const menuHeight = CHAT_PLATFORMS.length * 32 + 12;
-    setOpenPlatformSubmenu(sessionId);
-    setPlatformSubmenuPosition({
-      top: Math.max(8, Math.min(bounds.top, window.innerHeight - menuHeight - 8)),
-      left: Math.min(bounds.right + 6, window.innerWidth - menuWidth - 8),
-    });
   };
 
   const handleSelect = (id: string) => {
@@ -208,9 +256,9 @@ export function SidebarInbox({ onSelectChat }: SidebarInboxProps) {
         </div>
 
         {/* Dropdown Sort dan Filter Status */}
-        <div className="flex items-center gap-1.5 justify-between">
+        <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-between">
           {/* Dropdown Sort */}
-          <div className="relative flex-1">
+          <div className="relative w-full sm:flex-1">
             <DropdownMenu className="w-full">
               <DropdownMenuTrigger className="flex h-9 w-full items-center justify-between rounded-lg border border-slate-200 bg-[#fafbf8] px-2.5 text-[11px] font-medium text-slate-700 transition-colors hover:bg-white focus-visible:ring-2 focus-visible:ring-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:focus-visible:ring-slate-700">
                 <span className="flex items-center gap-2">
@@ -235,12 +283,12 @@ export function SidebarInbox({ onSelectChat }: SidebarInboxProps) {
           </div>
 
           {/* Filter Status Pills (Semua, Berjalan, Selesai) */}
-          <div className="flex items-center gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-0.5 shrink-0 text-[10px]">
-            <FilterSliders className="ml-1 h-3 w-3 text-slate-400" aria-hidden="true" />
+          <div className="flex w-full shrink-0 items-center gap-1 rounded-lg border border-slate-200 bg-white p-0.5 text-[10px] dark:border-slate-800 dark:bg-slate-900 sm:w-auto">
+            <FilterSliders className="ml-1 h-3 w-3 shrink-0 text-slate-400" aria-hidden="true" />
             <button
               type="button"
               onClick={() => setStatusFilter("all")}
-              className={`px-2 py-0.5 rounded font-medium transition-colors ${
+              className={`flex-1 rounded px-2 py-0.5 text-center font-medium transition-colors sm:flex-none ${
                 statusFilter === "all"
                   ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900"
                   : "text-slate-500 hover:text-slate-900 dark:text-slate-400"
@@ -251,7 +299,7 @@ export function SidebarInbox({ onSelectChat }: SidebarInboxProps) {
             <button
               type="button"
               onClick={() => setStatusFilter("active")}
-              className={`px-2 py-0.5 rounded font-medium transition-colors ${
+              className={`flex-1 rounded px-2 py-0.5 text-center font-medium transition-colors sm:flex-none ${
                 statusFilter === "active"
                   ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900"
                   : "text-slate-500 hover:text-slate-900 dark:text-slate-400"
@@ -262,7 +310,7 @@ export function SidebarInbox({ onSelectChat }: SidebarInboxProps) {
             <button
               type="button"
               onClick={() => setStatusFilter("resolved")}
-              className={`px-2 py-0.5 rounded font-medium transition-colors ${
+              className={`flex-1 rounded px-2 py-0.5 text-center font-medium transition-colors sm:flex-none ${
                 statusFilter === "resolved"
                   ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900"
                   : "text-slate-500 hover:text-slate-900 dark:text-slate-400"
@@ -400,7 +448,7 @@ export function SidebarInbox({ onSelectChat }: SidebarInboxProps) {
                   className="shrink-0 flex items-center"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <DropdownMenu onClose={closePlatformSubmenu}>
+                  <DropdownMenu>
                     <DropdownMenuTrigger
                       className={`p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-opacity ${
                         isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
@@ -455,23 +503,7 @@ export function SidebarInbox({ onSelectChat }: SidebarInboxProps) {
 
                       <DropdownMenuSeparator />
 
-                      <button
-                        type="button"
-                        aria-haspopup="menu"
-                        aria-expanded={openPlatformSubmenu === session.id}
-                        onClick={(event) => {
-                          if (openPlatformSubmenu === session.id) {
-                            setOpenPlatformSubmenu(null);
-                            setPlatformSubmenuPosition(null);
-                          } else {
-                            showPlatformSubmenu(session.id, event.currentTarget);
-                          }
-                        }}
-                        className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-xs text-slate-700 outline-none transition-colors hover:bg-slate-100 focus-visible:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 dark:focus-visible:bg-slate-800"
-                      >
-                        <span>Sumber platform</span>
-                        <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
-                      </button>
+                      <PlatformSourceSubmenu session={session} onSelect={updatePlatform} />
 
                       <DropdownMenuSeparator />
 
@@ -502,28 +534,6 @@ export function SidebarInbox({ onSelectChat }: SidebarInboxProps) {
                         <span>Hapus Chat...</span>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
-                    {openPlatformSubmenu === session.id && platformSubmenuPosition && typeof document !== "undefined" && createPortal(
-                      <div
-                        role="menu"
-                        aria-label="Pilih sumber platform"
-                        onMouseDown={(event) => event.stopPropagation()}
-                        onClick={(event) => event.stopPropagation()}
-                        style={{ top: platformSubmenuPosition.top, left: platformSubmenuPosition.left }}
-                        className="fixed z-[10000] max-h-[calc(100vh-16px)] w-[168px] overflow-y-auto rounded-xl border border-slate-200 bg-white p-1.5 text-slate-900 shadow-xl dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                      >
-                        {CHAT_PLATFORMS.map((platform: PlatformType) => (
-                          <DropdownMenuItem
-                            key={platform}
-                            onClick={() => updatePlatform(session.id, platform)}
-                            className={`justify-between px-2.5 py-1.5 text-[11px] ${session.platform === platform ? "bg-slate-100 font-semibold text-slate-900 dark:bg-slate-800 dark:text-slate-100" : "text-slate-600 dark:text-slate-300"}`}
-                          >
-                            {platform}
-                            {session.platform === platform && <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />}
-                          </DropdownMenuItem>
-                        ))}
-                      </div>,
-                      document.body
-                    )}
                   </DropdownMenu>
                 </div>
               </div>

@@ -10,23 +10,21 @@ interface DropdownContextType {
 
 const DropdownContext = React.createContext<DropdownContextType | undefined>(undefined);
 
+export function useDropdownMenuOpen() {
+  const context = React.useContext(DropdownContext);
+  if (!context) throw new Error("useDropdownMenuOpen must be used within DropdownMenu");
+  return context.open;
+}
+
 export function DropdownMenu({
   children,
   className,
-  onClose,
 }: {
   children: React.ReactNode;
   className?: string;
-  onClose?: () => void;
 }) {
   const [open, setOpen] = React.useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
-  const wasOpen = React.useRef(open);
-
-  React.useEffect(() => {
-    if (wasOpen.current && !open) onClose?.();
-    wasOpen.current = open;
-  }, [open, onClose]);
 
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

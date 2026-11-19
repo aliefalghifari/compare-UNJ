@@ -28,7 +28,7 @@ export default function HomePage() {
   */
 
   return (
-    <main className="w-full h-screen overflow-hidden">
+    <main className="h-[100dvh] w-full overflow-hidden">
       <ChatLayout onLogoutClick={() => logout()} />
     </main>
   );

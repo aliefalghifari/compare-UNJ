@@ -55,7 +55,7 @@ export function LoginCard({ onSuccess }: LoginCardProps) {
       </div>
 
       {/* Main Card */}
-      <div className="bg-white dark:bg-[#202c33] border border-[#e9edef] dark:border-[#2a3942] rounded-xl p-6 shadow-xs">
+      <div className="rounded-xl border border-[#e9edef] bg-white p-4 shadow-xs dark:border-[#2a3942] dark:bg-[#202c33] sm:p-6">
         {/* Brand Header */}
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-lg bg-[#00a884] flex items-center justify-center text-white shrink-0">
