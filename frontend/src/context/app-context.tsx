@@ -14,6 +14,15 @@ import {
 } from "@/types";
 import { INITIAL_CHAT_SESSIONS, MOCK_USERS } from "@/data/mock-data";
 import { showToast } from "@/lib/alerts";
+import {
+  createChatSession,
+  deleteChatSession,
+  formatTime,
+  getPlatformBadgeColor,
+  insertChatMessage,
+  seedInitialSessionsIfEmpty,
+  updateChatSession,
+} from "@/services/chat-service";
 
 interface AppContextType {
   // Theme state
@@ -38,17 +47,18 @@ interface AppContextType {
   activeChatId: string;
   activeChat: ChatSession | undefined;
   setActiveChatId: (id: string) => void;
-  createNewChat: () => void;
-  sendMessage: (text: string) => void;
+  createNewChat: () => Promise<void>;
+  sendMessage: (text: string) => Promise<void>;
+  isLoadingSessions: boolean;
 
   // AI typing indicator
   isAiTyping: boolean;
 
   // Management operations with SweetAlert2 notifications
-  updatePriority: (id: string, priority: ChatPriority, notify?: boolean) => void;
-  updateStatus: (id: string, status: ChatStatus, notify?: boolean) => void;
-  renameChat: (id: string, newTitle: string, notify?: boolean) => void;
-  deleteChat: (id: string, notify?: boolean) => void;
+  updatePriority: (id: string, priority: ChatPriority, notify?: boolean) => Promise<void>;
+  updateStatus: (id: string, status: ChatStatus, notify?: boolean) => Promise<void>;
+  renameChat: (id: string, newTitle: string, notify?: boolean) => Promise<void>;
+  deleteChat: (id: string, notify?: boolean) => Promise<void>;
 
   // Sort & Filter state
   sortOption: SortOption;
@@ -71,7 +81,7 @@ interface AppContextType {
   filteredContacts: ChatSession[];
   selectedPlatformFilter: PlatformType | "all";
   setSelectedPlatformFilter: (platform: PlatformType | "all") => void;
-  updatePlatform: (id: string, platform: PlatformType) => void;
+  updatePlatform: (id: string, platform: PlatformType) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -140,7 +150,37 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // Chat sessions state
   const [chatSessions, setChatSessions] = useState<ChatSession[]>(INITIAL_CHAT_SESSIONS);
-  const [activeChatId, setActiveChatId] = useState<string>("chat-1");
+  const [activeChatId, setActiveChatId] = useState<string>(INITIAL_CHAT_SESSIONS[0]?.id || "chat-1");
+  const [isLoadingSessions, setIsLoadingSessions] = useState<boolean>(true);
+
+  // Load chat sessions from Supabase on mount
+  useEffect(() => {
+    let isMounted = true;
+
+    async function initializeSupabaseSessions() {
+      try {
+        setIsLoadingSessions(true);
+        // Seeds initial sessions if Supabase table is completely empty
+        const sessions = await seedInitialSessionsIfEmpty(INITIAL_CHAT_SESSIONS);
+        if (isMounted && sessions && sessions.length > 0) {
+          setChatSessions(sessions);
+          setActiveChatId(sessions[0].id);
+        }
+      } catch (err) {
+        console.error("Error connecting to Supabase chat sessions:", err);
+      } finally {
+        if (isMounted) {
+          setIsLoadingSessions(false);
+        }
+      }
+    }
+
+    initializeSupabaseSessions();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // AI typing status
   const [isAiTyping, setIsAiTyping] = useState<boolean>(false);
@@ -154,113 +194,132 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const activeChat = chatSessions.find((s) => s.id === activeChatId) || chatSessions[0];
 
-  // Create New Chat session (with SweetAlert2 Toast)
-  const createNewChat = () => {
-    const newId = `chat-${Date.now()}`;
-    const now = new Date();
-    const timeString = `${String(now.getHours()).padStart(2, "0")}:${String(
-      now.getMinutes()
-    ).padStart(2, "0")}`;
+  // 1. Create New Chat session (Create)
+  const createNewChat = async () => {
+    try {
+      const newTitle = `Pengujian Sesi #${Math.floor(1000 + Math.random() * 9000)}`;
 
-    const newTitle = `Pengujian Sesi #${Math.floor(1000 + Math.random() * 9000)}`;
+      // Insert into Supabase chat_sessions
+      const newSession = await createChatSession({
+        title: newTitle,
+        platform: "shopee",
+        priority: "medium",
+        status: "active",
+      });
 
-    const newSession: ChatSession = {
-      id: newId,
-      title: newTitle,
-      customerName: "Pengujian CS Staf",
-      customerAvatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
-      platform: "Shopee",
-      platformBadgeColor: "bg-orange-500/10 text-orange-600 border border-orange-200 dark:border-orange-900/40",
-      priority: "medium",
-      status: "active",
-      isOnline: true,
-      unreadCount: 0,
-      pinned: false,
-      lastMessage: "AI Bot siap menerima pengujian query dan intent.",
-      lastMessageTime: timeString,
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString(),
-      messages: [
-        {
-          id: `msg-${Date.now()}-welcome`,
-          senderId: "ai-bot",
-          senderName: "AI Assistant Toko Husin",
-          senderRole: "agent",
-          text: "Halo Mas Ahmad (CS)! Backend AI Assistant Toko Husin siap menguji intent klasifikasi produk, SOP garansi keluhan, dan rekomendasi respons cepat. Silakan masukkan query percakapan.",
-          timestamp: timeString,
-          isIncoming: false,
-          status: "read",
-        },
-      ],
-      tags: ["Pengujian", "Aktif"],
-    };
+      // Insert initial welcome message into Supabase chat_messages
+      const welcomeMsg = await insertChatMessage({
+        sessionId: newSession.id,
+        sender: "ai_bot",
+        messageText:
+          "Halo Mas Ahmad (CS)! Backend AI Assistant Toko Husin siap menguji intent klasifikasi produk, SOP garansi keluhan, dan rekomendasi respons cepat. Silakan masukkan query percakapan.",
+      });
 
-    setChatSessions((prev) => [newSession, ...prev]);
-    setActiveChatId(newId);
-    showToast({ icon: "success", title: "Sesi Pengujian Baru Berhasil Dibuat!" });
+      newSession.messages = [welcomeMsg];
+      newSession.lastMessage = welcomeMsg.text;
+      newSession.lastMessageTime = welcomeMsg.timestamp;
+
+      setChatSessions((prev) => [newSession, ...prev]);
+      setActiveChatId(newSession.id);
+      showToast({ icon: "success", title: "Sesi Pengujian Baru Berhasil Dibuat!" });
+    } catch (err) {
+      console.error("Error creating chat session in Supabase:", err);
+      showToast({ icon: "error", title: "Gagal membuat sesi di database" });
+    }
   };
 
-  // Update Priority with SweetAlert2
-  const updatePriority = (id: string, priority: ChatPriority, notify = true) => {
+  // 2. Update Priority (Update)
+  const updatePriority = async (id: string, priority: ChatPriority, notify = true) => {
+    // Optimistic UI update
     setChatSessions((prev) =>
       prev.map((chat) => (chat.id === id ? { ...chat, priority } : chat))
     );
     if (notify) {
-      const priorityLabel = priority === "high" ? "High (Tinggi)" : priority === "medium" ? "Medium (Sedang)" : "Low (Rendah)";
+      const priorityLabel =
+        priority === "high"
+          ? "High (Tinggi)"
+          : priority === "medium"
+          ? "Medium (Sedang)"
+          : "Low (Rendah)";
       showToast({ icon: "info", title: `Prioritas Diperbarui: ${priorityLabel}` });
+    }
+    try {
+      await updateChatSession(id, { priority });
+    } catch (err) {
+      console.error("Failed to update priority in Supabase:", err);
     }
   };
 
-  const updatePlatform = (id: string, platform: PlatformType) => {
-    const platformColors: Record<PlatformType, string> = {
-      Shopee: "bg-orange-500/10 text-orange-600 border border-orange-200 dark:border-orange-900/40",
-      "TikTok Shop": "bg-neutral-900/10 text-neutral-800 dark:text-neutral-200 border border-neutral-300 dark:border-neutral-700",
-      Lazada: "bg-blue-500/10 text-blue-600 border border-blue-200 dark:border-blue-900/40",
-      Tokopedia: "bg-emerald-500/10 text-emerald-600 border border-emerald-200 dark:border-emerald-900/40",
-      WhatsApp: "bg-green-500/10 text-green-700 border border-green-200 dark:border-green-900/40",
-      Instagram: "bg-pink-500/10 text-pink-600 border border-pink-200 dark:border-pink-900/40",
-    };
+  // 3. Update Platform Source
+  const updatePlatform = async (id: string, platform: PlatformType) => {
+    const badgeColor = getPlatformBadgeColor(platform);
 
-    setChatSessions((prev) => prev.map((chat) => chat.id === id
-      ? {
-          ...chat,
-          platform,
-          platformBadgeColor: platformColors[platform],
-          tags: [
-            ...(chat.tags ?? []).filter((tag) => !CHAT_PLATFORMS.includes(tag as PlatformType)),
-            platform,
-          ],
-        }
-      : chat));
+    setChatSessions((prev) =>
+      prev.map((chat) =>
+        chat.id === id
+          ? {
+              ...chat,
+              platform,
+              platformBadgeColor: badgeColor,
+              tags: [
+                ...(chat.tags ?? []).filter(
+                  (tag) => !CHAT_PLATFORMS.includes(tag as (typeof CHAT_PLATFORMS)[number])
+                ),
+                platform,
+              ],
+            }
+          : chat
+      )
+    );
     showToast({ icon: "success", title: `Sumber chat diubah ke ${platform}` });
+    try {
+      await updateChatSession(id, { platform });
+    } catch (err) {
+      console.error("Failed to update platform in Supabase:", err);
+    }
   };
 
-  // Update Status with SweetAlert2
-  const updateStatus = (id: string, status: ChatStatus, notify = true) => {
+  // 4. Update Status (Update)
+  const updateStatus = async (id: string, status: ChatStatus, notify = true) => {
+    // Optimistic UI update
     setChatSessions((prev) =>
       prev.map((chat) => (chat.id === id ? { ...chat, status } : chat))
     );
     if (notify) {
       showToast({
         icon: "success",
-        title: status === "resolved" ? "Sesi Ditandai Selesai (Resolved)" : "Sesi Dibuka Kembali (Active)",
+        title:
+          status === "resolved"
+            ? "Sesi Ditandai Selesai (Resolved)"
+            : "Sesi Dibuka Kembali (Active)",
       });
+    }
+    try {
+      await updateChatSession(id, { status });
+    } catch (err) {
+      console.error("Failed to update status in Supabase:", err);
     }
   };
 
-  // Rename Chat with SweetAlert2
-  const renameChat = (id: string, newTitle: string, notify = true) => {
+  // 5. Rename Chat (Update)
+  const renameChat = async (id: string, newTitle: string, notify = true) => {
     if (!newTitle.trim()) return;
+    const trimmed = newTitle.trim();
     setChatSessions((prev) =>
-      prev.map((chat) => (chat.id === id ? { ...chat, title: newTitle.trim() } : chat))
+      prev.map((chat) => (chat.id === id ? { ...chat, title: trimmed } : chat))
     );
     if (notify) {
       showToast({ icon: "success", title: "Nama Sesi Berhasil Diubah!" });
     }
+    try {
+      await updateChatSession(id, { title: trimmed });
+    } catch (err) {
+      console.error("Failed to rename chat in Supabase:", err);
+    }
   };
 
-  // Delete Chat with SweetAlert2
-  const deleteChat = (id: string, notify = true) => {
+  // 6. Delete Chat (Delete)
+  const deleteChat = async (id: string, notify = true) => {
     setChatSessions((prev) => {
       const remaining = prev.filter((chat) => chat.id !== id);
       if (activeChatId === id && remaining.length > 0) {
@@ -271,34 +330,40 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (notify) {
       showToast({ icon: "success", title: "Sesi Chat Telah Dihapus" });
     }
+    try {
+      await deleteChatSession(id);
+    } catch (err) {
+      console.error("Failed to delete chat in Supabase:", err);
+    }
   };
 
-  // Send message from CS to AI Bot
-  const sendMessage = (text: string) => {
+  // 7. Send message from CS to AI Bot
+  const sendMessage = async (text: string) => {
     if (!text.trim() || !activeChat) return;
 
+    const trimmedText = text.trim();
     const now = new Date();
-    const timeString = `${String(now.getHours()).padStart(2, "0")}:${String(
-      now.getMinutes()
-    ).padStart(2, "0")}`;
+    const timeString = formatTime(now.toISOString());
 
     const userMessage: Message = {
-      id: `msg-${Date.now()}`,
+      id: `temp-${Date.now()}`,
+      sessionId: activeChat.id,
       senderId: currentUser.id,
       senderName: currentUser.name,
       senderRole: "cs",
-      text: text.trim(),
+      text: trimmedText,
       timestamp: timeString,
       isIncoming: false,
       status: "sent",
     };
 
+    // Optimistically update message feed
     setChatSessions((prev) =>
       prev.map((chat) => {
         if (chat.id === activeChat.id) {
           return {
             ...chat,
-            lastMessage: text.trim(),
+            lastMessage: trimmedText,
             lastMessageTime: timeString,
             updatedAt: now.toISOString(),
             messages: [...chat.messages, userMessage],
@@ -308,60 +373,124 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       })
     );
 
+    // Save CS message in Supabase
+    try {
+      const savedMsg = await insertChatMessage({
+        sessionId: activeChat.id,
+        sender: "cs",
+        messageText: trimmedText,
+      });
+      // Update with persistent message ID
+      setChatSessions((prev) =>
+        prev.map((chat) => {
+          if (chat.id === activeChat.id) {
+            return {
+              ...chat,
+              messages: chat.messages.map((m) => (m.id === userMessage.id ? savedMsg : m)),
+            };
+          }
+          return chat;
+        })
+      );
+    } catch (err) {
+      console.warn("Could not persist CS message to Supabase:", err);
+    }
+
     // Trigger AI Typing indicator
     setIsAiTyping(true);
 
     // Simulated Backend AI prediction & response
-    setTimeout(() => {
-      const lower = text.toLowerCase();
-      let replyText = "Query telah dievaluasi oleh backend AI Toko Husin. Respon rekomendasi telah disesuaikan dengan SOP katalog toko.";
+    setTimeout(async () => {
+      const lower = trimmedText.toLowerCase();
+      let replyText =
+        "Query telah dievaluasi oleh backend AI Toko Husin. Respon rekomendasi telah disesuaikan dengan SOP katalog toko.";
       let detectedIntent = "Pengecekan Umum / FAQ Toko";
       let detectedEntities: { label: string; value: string }[] | undefined = undefined;
 
-      if (lower.includes("stok") || lower.includes("ready") || lower.includes("kurma") || lower.includes("sukari") || lower.includes("ajwa")) {
+      if (
+        lower.includes("stok") ||
+        lower.includes("ready") ||
+        lower.includes("kurma") ||
+        lower.includes("sukari") ||
+        lower.includes("ajwa")
+      ) {
         detectedIntent = "Intent: Cek Stok Produk";
         detectedEntities = [
           { label: "PRODUK", value: "Kurma Sukari Al-Qassim" },
           { label: "STATUS GUDANG", value: "Ready 48 Box (1kg)" },
           { label: "HARGA", value: "Rp 85.000 / Box" },
         ];
-        replyText = "Hasil Prediksi Backend: Stok Kurma Sukari Al-Qassim kemasan 1kg saat ini tersedia 48 box di rak utama. Produk segar, tanpa pemanis buatan, dan siap dikirim dengan ekstra bubble wrap gratis!";
-      } else if (lower.includes("rusak") || lower.includes("bocor") || lower.includes("keluhan") || lower.includes("komplain") || lower.includes("ongkir")) {
+        replyText =
+          "Hasil Prediksi Backend: Stok Kurma Sukari Al-Qassim kemasan 1kg saat ini tersedia 48 box di rak utama. Produk segar, tanpa pemanis buatan, dan siap dikirim dengan ekstra bubble wrap gratis!";
+      } else if (
+        lower.includes("rusak") ||
+        lower.includes("bocor") ||
+        lower.includes("keluhan") ||
+        lower.includes("komplain") ||
+        lower.includes("ongkir")
+      ) {
         detectedIntent = "Intent: Eskalasi Keluhan (Tinggi)";
         detectedEntities = [
           { label: "KATEGORI", value: "Kerusakan Fisik Barang / Paket Bocor" },
           { label: "KEBIJAKAN", value: "Garansi 100% Penggantian Baru" },
           { label: "ACTION", value: "Buka Tiket Resi Pengganti" },
         ];
-        replyText = "Hasil Prediksi Backend: Keluhan dikategorikan Prioritas Tinggi. Sistem merekomendasikan penerbitan garansi 100% barang baru tanpa biaya tambahan setelah konfirmasi bukti unboxing.";
-      } else if (lower.includes("kirim") || lower.includes("jadwal") || lower.includes("pick-up") || lower.includes("ekspedisi")) {
+        replyText =
+          "Hasil Prediksi Backend: Keluhan dikategorikan Prioritas Tinggi. Sistem merekomendasikan penerbitan garansi 100% barang baru tanpa biaya tambahan setelah konfirmasi bukti unboxing.";
+      } else if (
+        lower.includes("kirim") ||
+        lower.includes("jadwal") ||
+        lower.includes("pick-up") ||
+        lower.includes("ekspedisi")
+      ) {
         detectedIntent = "Intent: Kebijakan Pengiriman";
         detectedEntities = [
           { label: "CUT-OFF", value: "15.00 WIB" },
           { label: "KURIR", value: "J&T, SiCepat, Kargo" },
         ];
-        replyText = "Hasil Prediksi Backend: Batas waktu order reguler adalah pukul 15.00 WIB. Pesanan sebelum cut-off dipastikan berangkat di hari yang sama.";
-      } else if (lower.includes("grosir") || lower.includes("diskon") || lower.includes("sajadah")) {
+        replyText =
+          "Hasil Prediksi Backend: Batas waktu order reguler adalah pukul 15.00 WIB. Pesanan sebelum cut-off dipastikan berangkat di hari yang sama.";
+      } else if (
+        lower.includes("grosir") ||
+        lower.includes("diskon") ||
+        lower.includes("sajadah")
+      ) {
         detectedIntent = "Intent: Skema Grosir B2B";
         detectedEntities = [
           { label: "MINIMAL ORDER", value: "20 Pcs (1 Kodi)" },
           { label: "POTONGAN", value: "Diskon 15% + Pouch Gratis" },
         ];
-        replyText = "Hasil Prediksi Backend: Untuk kuantiti 20 pcs ke atas, sistem mengizinkan diskon grosir 15% plus bonus pouch sajadah per buah.";
+        replyText =
+          "Hasil Prediksi Backend: Untuk kuantiti 20 pcs ke atas, sistem mengizinkan diskon grosir 15% plus bonus pouch sajadah per buah.";
       }
 
-      const agentReply: Message = {
-        id: `msg-${Date.now()}-agent`,
+      let agentReply: Message = {
+        id: `temp-agent-${Date.now()}`,
+        sessionId: activeChat.id,
         senderId: "ai-bot",
         senderName: "AI Assistant Toko Husin",
         senderRole: "agent",
         text: replyText,
-        timestamp: timeString,
+        timestamp: formatTime(new Date().toISOString()),
         isIncoming: false,
         status: "read",
         detectedIntent,
         detectedEntities,
       };
+
+      try {
+        const savedAgentMsg = await insertChatMessage({
+          sessionId: activeChat.id,
+          sender: "ai_bot",
+          messageText: replyText,
+          detectedIntent,
+          confidenceScore: 0.95,
+          extractedEntities: detectedEntities,
+        });
+        agentReply = savedAgentMsg;
+      } catch (err) {
+        console.warn("Could not persist AI message to Supabase:", err);
+      }
 
       setChatSessions((latest) =>
         latest.map((c) => {
@@ -369,7 +498,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             return {
               ...c,
               lastMessage: replyText,
-              lastMessageTime: timeString,
+              lastMessageTime: agentReply.timestamp,
               updatedAt: new Date().toISOString(),
               messages: [...c.messages, agentReply],
             };
@@ -453,6 +582,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setActiveChatId,
         createNewChat,
         sendMessage,
+        isLoadingSessions,
         isAiTyping,
         updatePriority,
         updatePlatform,
