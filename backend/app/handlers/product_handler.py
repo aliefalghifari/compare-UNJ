@@ -1,5 +1,7 @@
+from backend.services.product_services import ProductService
+
 class ProductHandler:
-    def __init__(self,product_service):
+    def __init__(self,product_service:ProductService):
         self. product_service = product_service
         self.ENTITY_MAPPING = {
             "PRODUCT":"product_name",
@@ -20,10 +22,22 @@ class ProductHandler:
                 "status":"need_clarification",
                 "required":missing
             }
+        result = self.search_product(product_entities["product_name"])
         return {
             "intent":intent,
-            "status": "ready_for_lookup",
-            "entities":product_entities
+            **result
+        }
+
+    def search_product(self,product_name:str):
+        products = self.product_service.get_product(product_name)
+        if not products:
+            return {
+                "status":"not_found",
+                "data":[]
+            }
+        return {
+            "status":"success",
+            "data":products
         }
 
     def _filter_entities(self,entities:list[dict]):
@@ -38,7 +52,7 @@ class ProductHandler:
                 filtered[entity_name] = item.get("text")
         return filtered
 
-    def _validate_entities(self,entities:list):
+    def _validate_entities(self,entities:dict):
         missing = []
         if not entities.get("product_name"):
             missing.append("product_name")
