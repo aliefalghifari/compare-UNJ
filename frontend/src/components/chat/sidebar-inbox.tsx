@@ -1,6 +1,9 @@
 "use client";
 
 import React from "react";
+import { createPortal } from "react-dom";
+import Flatpickr from "react-flatpickr";
+import { Indonesian } from "flatpickr/dist/l10n/id.js";
 import { useApp } from "@/context/app-context";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -25,8 +28,15 @@ import {
   Trash2,
   MessageSquare,
   Sparkles,
+  CalendarDays,
+  RotateCcw,
+  SlidersHorizontal as FilterSliders,
+  ChevronDown,
+  ChevronRight,
+  Check,
+  Store,
 } from "lucide-react";
-import { ChatPriority, ChatSession, SortOption } from "@/types";
+import { CHAT_PLATFORMS, ChatPriority, ChatSession, PlatformType, SortOption } from "@/types";
 import { confirmDeleteChat, confirmStatusChange, promptRenameChat } from "@/lib/alerts";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -36,12 +46,19 @@ interface SidebarInboxProps {
 }
 
 export function SidebarInbox({ onSelectChat }: SidebarInboxProps) {
+  const [openPlatformSubmenu, setOpenPlatformSubmenu] = React.useState<string | null>(null);
+  const [platformSubmenuPosition, setPlatformSubmenuPosition] = React.useState<{ top: number; left: number } | null>(null);
+  const closePlatformSubmenu = React.useCallback(() => {
+    setOpenPlatformSubmenu(null);
+    setPlatformSubmenuPosition(null);
+  }, []);
   const {
     currentUser,
     activeChatId,
     setActiveChatId,
     createNewChat,
     updatePriority,
+    updatePlatform,
     updateStatus,
     renameChat,
     deleteChat,
@@ -51,8 +68,30 @@ export function SidebarInbox({ onSelectChat }: SidebarInboxProps) {
     setSearchQuery,
     statusFilter,
     setStatusFilter,
+    dateRange,
+    setDateRange,
+    selectedPlatformFilter,
+    setSelectedPlatformFilter,
     sortedAndFilteredSessions,
   } = useApp();
+
+  const sortLabels: Record<SortOption, string> = {
+    priority: "Prioritas",
+    newest: "Terbaru",
+    oldest: "Terlama",
+    date: "Tanggal dibuat",
+  };
+
+  const showPlatformSubmenu = (sessionId: string, trigger: HTMLButtonElement) => {
+    const bounds = trigger.getBoundingClientRect();
+    const menuWidth = 168;
+    const menuHeight = CHAT_PLATFORMS.length * 32 + 12;
+    setOpenPlatformSubmenu(sessionId);
+    setPlatformSubmenuPosition({
+      top: Math.max(8, Math.min(bounds.top, window.innerHeight - menuHeight - 8)),
+      left: Math.min(bounds.right + 6, window.innerWidth - menuWidth - 8),
+    });
+  };
 
   const handleSelect = (id: string) => {
     setActiveChatId(id);
@@ -112,9 +151,9 @@ export function SidebarInbox({ onSelectChat }: SidebarInboxProps) {
   return (
     <div className="flex flex-col h-full bg-slate-50 dark:bg-[#18181b] border-r border-slate-200/80 dark:border-slate-800 select-none">
       {/* 1. Header Sidebar & Brand */}
-      <div className="p-3 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between shrink-0">
+      <div className="px-4 py-3.5 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-2xs">
+          <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white">
             <Sparkles className="w-4 h-4" />
           </div>
           <div>
@@ -132,13 +171,13 @@ export function SidebarInbox({ onSelectChat }: SidebarInboxProps) {
       </div>
 
       {/* 2. Tombol "New Chat / Sesi Baru" */}
-      <div className="p-3 pb-2 shrink-0">
+      <div className="px-4 pt-4 pb-3 shrink-0">
         <Button
           type="button"
           onClick={createNewChat}
-          className="w-full h-10 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-800 shadow-2xs font-semibold text-xs flex items-center justify-center gap-2 group transition-all"
+          className="w-full h-10 rounded-lg bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-white text-white dark:text-slate-900 border border-transparent font-medium text-xs flex items-center justify-center gap-2 group transition-colors"
         >
-          <div className="w-5 h-5 rounded-lg bg-emerald-500 text-white flex items-center justify-center group-hover:scale-110 transition-transform">
+          <div className="w-5 h-5 rounded-md bg-white/15 text-white flex items-center justify-center">
             <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
           </div>
           <span>New Chat / Sesi Baru</span>
@@ -146,7 +185,7 @@ export function SidebarInbox({ onSelectChat }: SidebarInboxProps) {
       </div>
 
       {/* 3. Search & Dropdown Sort / Filter */}
-      <div className="px-3 pb-2 shrink-0 space-y-2">
+      <div className="px-4 pb-3 shrink-0 space-y-2.5">
         {/* Search Bar */}
         <div className="relative flex items-center">
           <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 pointer-events-none" />
@@ -155,7 +194,7 @@ export function SidebarInbox({ onSelectChat }: SidebarInboxProps) {
             placeholder="Cari topik atau pengujian..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-8 pr-7 h-8 text-xs bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-800 rounded-lg outline-none focus:border-emerald-500 placeholder:text-slate-400"
+            className="w-full pl-8 pr-7 h-9 text-xs bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-800 rounded-lg outline-none focus:border-slate-400 dark:focus:border-slate-600 placeholder:text-slate-400"
           />
           {searchQuery && (
             <button
@@ -172,31 +211,32 @@ export function SidebarInbox({ onSelectChat }: SidebarInboxProps) {
         <div className="flex items-center gap-1.5 justify-between">
           {/* Dropdown Sort */}
           <div className="relative flex-1">
-            <div className="flex items-center gap-1 h-7 px-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-[11px] text-slate-700 dark:text-slate-300">
-              <ArrowUpDown className="w-3 h-3 text-slate-400 shrink-0" />
-              <select
-                value={sortOption}
-                onChange={(e) => setSortOption(e.target.value as SortOption)}
-                className="w-full bg-transparent outline-none cursor-pointer text-[11px] font-medium"
-              >
-                <option value="priority" className="dark:bg-slate-900">
-                  ⚡ Prioritas (High → Low)
-                </option>
-                <option value="newest" className="dark:bg-slate-900">
-                  🕒 Terbaru (Newest)
-                </option>
-                <option value="oldest" className="dark:bg-slate-900">
-                  ⌛ Terlama (Oldest)
-                </option>
-                <option value="date" className="dark:bg-slate-900">
-                  📅 Tanggal
-                </option>
-              </select>
-            </div>
+            <DropdownMenu className="w-full">
+              <DropdownMenuTrigger className="flex h-9 w-full items-center justify-between rounded-lg border border-slate-200 bg-[#fafbf8] px-2.5 text-[11px] font-medium text-slate-700 transition-colors hover:bg-white focus-visible:ring-2 focus-visible:ring-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:focus-visible:ring-slate-700">
+                <span className="flex items-center gap-2">
+                  <ArrowUpDown className="h-3.5 w-3.5 text-slate-400" />
+                  {sortLabels[sortOption]}
+                </span>
+                <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="left" className="mt-1 w-full min-w-0 rounded-lg border-slate-200 p-1 shadow-lg dark:border-slate-700">
+                {(["priority", "newest", "oldest", "date"] as SortOption[]).map((option) => (
+                  <DropdownMenuItem
+                    key={option}
+                    onClick={() => setSortOption(option)}
+                    className={`justify-between px-2.5 py-2 text-[11px] ${sortOption === option ? "bg-slate-100 font-semibold text-slate-900 dark:bg-slate-800 dark:text-slate-100" : "text-slate-600 dark:text-slate-300"}`}
+                  >
+                    {sortLabels[option]}
+                    {sortOption === option && <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Filter Status Pills (Semua, Berjalan, Selesai) */}
-          <div className="flex items-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-0.5 shrink-0 text-[10px]">
+          <div className="flex items-center gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-0.5 shrink-0 text-[10px]">
+            <FilterSliders className="ml-1 h-3 w-3 text-slate-400" aria-hidden="true" />
             <button
               type="button"
               onClick={() => setStatusFilter("all")}
@@ -213,25 +253,80 @@ export function SidebarInbox({ onSelectChat }: SidebarInboxProps) {
               onClick={() => setStatusFilter("active")}
               className={`px-2 py-0.5 rounded font-medium transition-colors ${
                 statusFilter === "active"
-                  ? "bg-blue-600 text-white"
+                  ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900"
                   : "text-slate-500 hover:text-slate-900 dark:text-slate-400"
               }`}
             >
-              Active
+              Berjalan
             </button>
             <button
               type="button"
               onClick={() => setStatusFilter("resolved")}
               className={`px-2 py-0.5 rounded font-medium transition-colors ${
                 statusFilter === "resolved"
-                  ? "bg-emerald-600 text-white"
+                  ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900"
                   : "text-slate-500 hover:text-slate-900 dark:text-slate-400"
               }`}
             >
-              Resolved
+              Selesai
             </button>
           </div>
         </div>
+
+        <div className="flex items-center gap-2">
+          <div className="relative min-w-0 flex-1">
+            <CalendarDays className="pointer-events-none absolute left-2.5 top-1/2 z-10 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+            <Flatpickr
+              value={dateRange.from && dateRange.to ? [dateRange.from, dateRange.to] : dateRange.from ? [dateRange.from] : []}
+              options={{
+                mode: "range",
+                dateFormat: "Y-m-d",
+                locale: Indonesian,
+                allowInput: false,
+                maxDate: "today",
+                appendTo: typeof document !== "undefined" ? document.body : undefined,
+              }}
+              onChange={(dates) => {
+                const toDateKey = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+                setDateRange({ from: dates[0] ? toDateKey(dates[0]) : null, to: dates[1] ? toDateKey(dates[1]) : null });
+              }}
+              placeholder="Pilih rentang tanggal"
+              className="h-9 w-full rounded-lg border border-slate-200 bg-white pl-8 pr-2 text-[11px] text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:focus:border-slate-600"
+              aria-label="Filter rentang tanggal chat"
+            />
+          </div>
+          {(dateRange.from || dateRange.to) && (
+            <button type="button" onClick={() => setDateRange({ from: null, to: null })} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:bg-slate-100 dark:border-slate-800 dark:hover:bg-slate-800" aria-label="Hapus filter tanggal" title="Hapus filter tanggal">
+              <RotateCcw className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+
+        <DropdownMenu className="w-full">
+          <DropdownMenuTrigger className="flex h-9 w-full items-center justify-between rounded-lg border border-slate-200 bg-[#fafbf8] px-2.5 text-[11px] font-medium text-slate-700 transition-colors hover:bg-white focus-visible:ring-2 focus-visible:ring-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:focus-visible:ring-slate-700">
+            <span className="flex items-center gap-2">
+              <Store className="h-3.5 w-3.5 text-slate-400" />
+              {selectedPlatformFilter === "all" ? "Semua platform" : selectedPlatformFilter}
+            </span>
+            <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="left" className="mt-1 w-full min-w-0 rounded-lg border-slate-200 p-1 shadow-lg dark:border-slate-700">
+            <DropdownMenuItem onClick={() => setSelectedPlatformFilter("all")} className="justify-between px-2.5 py-2 text-[11px]">
+              Semua platform
+              {selectedPlatformFilter === "all" && <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />}
+            </DropdownMenuItem>
+            {CHAT_PLATFORMS.map((platform) => (
+              <DropdownMenuItem
+                key={platform}
+                onClick={() => setSelectedPlatformFilter(platform)}
+                className="justify-between px-2.5 py-2 text-[11px]"
+              >
+                {platform}
+                {selectedPlatformFilter === platform && <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* 4. Daftar History Chat CS dengan AI (Scrollable) */}
@@ -257,9 +352,17 @@ export function SidebarInbox({ onSelectChat }: SidebarInboxProps) {
               >
                 {/* Content */}
                 <div className="flex-1 min-w-0 pr-1">
-                  <div className="flex items-center gap-1.5 mb-1">
+                  <div className="mb-1 flex items-center justify-between gap-2">
                     <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">
                       {session.title}
+                    </span>
+                    <span className="inline-flex shrink-0 items-center gap-1 text-[10px] text-slate-400 dark:text-slate-500" title="Tanggal dibuat">
+                      <CalendarDays className="h-3 w-3" />
+                      {new Date(session.createdAt).toLocaleDateString("id-ID", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
                     </span>
                   </div>
 
@@ -281,7 +384,7 @@ export function SidebarInbox({ onSelectChat }: SidebarInboxProps) {
                       </span>
                     )}
 
-                    <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
+                    <span className={`inline-flex items-center rounded-full px-1.5 py-0 text-[10px] font-medium ${session.platformBadgeColor}`}>
                       {session.platform}
                     </span>
                   </div>
@@ -297,7 +400,7 @@ export function SidebarInbox({ onSelectChat }: SidebarInboxProps) {
                   className="shrink-0 flex items-center"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <DropdownMenu>
+                  <DropdownMenu onClose={closePlatformSubmenu}>
                     <DropdownMenuTrigger
                       className={`p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-opacity ${
                         isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
@@ -307,7 +410,7 @@ export function SidebarInbox({ onSelectChat }: SidebarInboxProps) {
                       <MoreVertical className="w-4 h-4" />
                     </DropdownMenuTrigger>
 
-                    <DropdownMenuContent align="right" className="w-52">
+                    <DropdownMenuContent align="right" className="w-56">
                       <DropdownMenuLabel>Kelola Sesi Chat</DropdownMenuLabel>
 
                       {/* Sub-Menu: Set Priority dengan SweetAlert2 Toast */}
@@ -352,6 +455,26 @@ export function SidebarInbox({ onSelectChat }: SidebarInboxProps) {
 
                       <DropdownMenuSeparator />
 
+                      <button
+                        type="button"
+                        aria-haspopup="menu"
+                        aria-expanded={openPlatformSubmenu === session.id}
+                        onClick={(event) => {
+                          if (openPlatformSubmenu === session.id) {
+                            setOpenPlatformSubmenu(null);
+                            setPlatformSubmenuPosition(null);
+                          } else {
+                            showPlatformSubmenu(session.id, event.currentTarget);
+                          }
+                        }}
+                        className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-xs text-slate-700 outline-none transition-colors hover:bg-slate-100 focus-visible:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 dark:focus-visible:bg-slate-800"
+                      >
+                        <span>Sumber platform</span>
+                        <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+                      </button>
+
+                      <DropdownMenuSeparator />
+
                       {/* Tandai Selesai / Mark as Resolved dengan SweetAlert2 Confirm */}
                       <DropdownMenuItem onClick={() => handleStatusToggle(session)}>
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
@@ -379,6 +502,28 @@ export function SidebarInbox({ onSelectChat }: SidebarInboxProps) {
                         <span>Hapus Chat...</span>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
+                    {openPlatformSubmenu === session.id && platformSubmenuPosition && typeof document !== "undefined" && createPortal(
+                      <div
+                        role="menu"
+                        aria-label="Pilih sumber platform"
+                        onMouseDown={(event) => event.stopPropagation()}
+                        onClick={(event) => event.stopPropagation()}
+                        style={{ top: platformSubmenuPosition.top, left: platformSubmenuPosition.left }}
+                        className="fixed z-[10000] max-h-[calc(100vh-16px)] w-[168px] overflow-y-auto rounded-xl border border-slate-200 bg-white p-1.5 text-slate-900 shadow-xl dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                      >
+                        {CHAT_PLATFORMS.map((platform: PlatformType) => (
+                          <DropdownMenuItem
+                            key={platform}
+                            onClick={() => updatePlatform(session.id, platform)}
+                            className={`justify-between px-2.5 py-1.5 text-[11px] ${session.platform === platform ? "bg-slate-100 font-semibold text-slate-900 dark:bg-slate-800 dark:text-slate-100" : "text-slate-600 dark:text-slate-300"}`}
+                          >
+                            {platform}
+                            {session.platform === platform && <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />}
+                          </DropdownMenuItem>
+                        ))}
+                      </div>,
+                      document.body
+                    )}
                   </DropdownMenu>
                 </div>
               </div>

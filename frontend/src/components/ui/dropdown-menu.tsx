@@ -10,9 +10,23 @@ interface DropdownContextType {
 
 const DropdownContext = React.createContext<DropdownContextType | undefined>(undefined);
 
-export function DropdownMenu({ children }: { children: React.ReactNode }) {
+export function DropdownMenu({
+  children,
+  className,
+  onClose,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  onClose?: () => void;
+}) {
   const [open, setOpen] = React.useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
+  const wasOpen = React.useRef(open);
+
+  React.useEffect(() => {
+    if (wasOpen.current && !open) onClose?.();
+    wasOpen.current = open;
+  }, [open, onClose]);
 
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -30,7 +44,7 @@ export function DropdownMenu({ children }: { children: React.ReactNode }) {
 
   return (
     <DropdownContext.Provider value={{ open, setOpen }}>
-      <div ref={menuRef} className="relative inline-block text-left">
+      <div ref={menuRef} className={cn("relative inline-block text-left", className)}>
         {children}
       </div>
     </DropdownContext.Provider>

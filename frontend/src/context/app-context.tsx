@@ -2,10 +2,12 @@
 
 import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
 import {
+  CHAT_PLATFORMS,
   ChatPriority,
   ChatSession,
   ChatStatus,
   Message,
+  PlatformType,
   SortOption,
   UserProfile,
   UserRole,
@@ -55,6 +57,8 @@ interface AppContextType {
   setSearchQuery: (query: string) => void;
   statusFilter: "all" | "active" | "resolved";
   setStatusFilter: (filter: "all" | "active" | "resolved") => void;
+  dateRange: { from: string | null; to: string | null };
+  setDateRange: (range: { from: string | null; to: string | null }) => void;
 
   // Processed sessions list
   sortedAndFilteredSessions: ChatSession[];
@@ -65,8 +69,9 @@ interface AppContextType {
   activeContactId: string;
   setActiveContactId: (id: string) => void;
   filteredContacts: ChatSession[];
-  selectedPlatformFilter: string;
-  setSelectedPlatformFilter: (platform: string) => void;
+  selectedPlatformFilter: PlatformType | "all";
+  setSelectedPlatformFilter: (platform: PlatformType | "all") => void;
+  updatePlatform: (id: string, platform: PlatformType) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -144,7 +149,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [sortOption, setSortOption] = useState<SortOption>("priority");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "resolved">("all");
-  const [selectedPlatformFilter, setSelectedPlatformFilter] = useState<string>("all");
+  const [dateRange, setDateRange] = useState<{ from: string | null; to: string | null }>({ from: null, to: null });
+  const [selectedPlatformFilter, setSelectedPlatformFilter] = useState<PlatformType | "all">("all");
 
   const activeChat = chatSessions.find((s) => s.id === activeChatId) || chatSessions[0];
 
@@ -203,6 +209,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const priorityLabel = priority === "high" ? "High (Tinggi)" : priority === "medium" ? "Medium (Sedang)" : "Low (Rendah)";
       showToast({ icon: "info", title: `Prioritas Diperbarui: ${priorityLabel}` });
     }
+  };
+
+  const updatePlatform = (id: string, platform: PlatformType) => {
+    const platformColors: Record<PlatformType, string> = {
+      Shopee: "bg-orange-500/10 text-orange-600 border border-orange-200 dark:border-orange-900/40",
+      "TikTok Shop": "bg-neutral-900/10 text-neutral-800 dark:text-neutral-200 border border-neutral-300 dark:border-neutral-700",
+      Lazada: "bg-blue-500/10 text-blue-600 border border-blue-200 dark:border-blue-900/40",
+      Tokopedia: "bg-emerald-500/10 text-emerald-600 border border-emerald-200 dark:border-emerald-900/40",
+      WhatsApp: "bg-green-500/10 text-green-700 border border-green-200 dark:border-green-900/40",
+      Instagram: "bg-pink-500/10 text-pink-600 border border-pink-200 dark:border-pink-900/40",
+    };
+
+    setChatSessions((prev) => prev.map((chat) => chat.id === id
+      ? {
+          ...chat,
+          platform,
+          platformBadgeColor: platformColors[platform],
+          tags: [
+            ...(chat.tags ?? []).filter((tag) => !CHAT_PLATFORMS.includes(tag as PlatformType)),
+            platform,
+          ],
+        }
+      : chat));
+    showToast({ icon: "success", title: `Sumber chat diubah ke ${platform}` });
   };
 
   // Update Status with SweetAlert2
@@ -365,7 +395,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const matchStatus =
         statusFilter === "all" ? true : session.status === statusFilter;
 
-      return matchSearch && matchStatus;
+      const sessionDate = new Date(session.createdAt);
+      const fromDate = dateRange.from ? new Date(`${dateRange.from}T00:00:00`) : null;
+      const toDate = dateRange.to ? new Date(`${dateRange.to}T23:59:59.999`) : null;
+      const matchDate = (!fromDate || sessionDate >= fromDate) && (!toDate || sessionDate <= toDate);
+      const matchPlatform = selectedPlatformFilter === "all" || session.platform === selectedPlatformFilter;
+
+      return matchSearch && matchStatus && matchDate && matchPlatform;
     });
 
     // 2. Sort
@@ -395,7 +431,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       return 0;
     });
-  }, [chatSessions, searchQuery, statusFilter, sortOption]);
+  }, [chatSessions, searchQuery, statusFilter, sortOption, dateRange, selectedPlatformFilter]);
 
   return (
     <AppContext.Provider
@@ -419,6 +455,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         sendMessage,
         isAiTyping,
         updatePriority,
+        updatePlatform,
         updateStatus,
         renameChat,
         deleteChat,
@@ -428,6 +465,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setSearchQuery,
         statusFilter,
         setStatusFilter,
+        dateRange,
+        setDateRange,
         sortedAndFilteredSessions,
         // Aliases for compatibility
         contacts: chatSessions,

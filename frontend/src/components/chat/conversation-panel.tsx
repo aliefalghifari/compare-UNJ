@@ -142,9 +142,9 @@ export function ConversationPanel() {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-white dark:bg-[#121214] relative overflow-hidden">
+    <div className="flex-1 flex flex-col h-full bg-[#f3f4f1] dark:bg-[#17191b] relative overflow-hidden">
       {/* 1. Header Chat (Gemini / ChatGPT Style) */}
-      <header className="h-14 px-4 border-b border-slate-200/80 dark:border-slate-800 bg-white/80 dark:bg-[#121214]/80 backdrop-blur-md flex items-center justify-between z-20 shrink-0">
+      <header className="h-14 px-4 border-b border-slate-200/80 dark:border-slate-800 bg-[#f8f9f6]/95 dark:bg-[#17191b]/95 flex items-center justify-between z-20 shrink-0">
         <div className="flex items-center gap-3 min-w-0">
           {/* Toggle sidebar button */}
           <button
@@ -389,7 +389,7 @@ export function ConversationPanel() {
           </div>
 
           {/* Floating Input Box Card */}
-          <div className="relative rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg p-2 focus-within:border-emerald-500/70 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
+          <div className="relative rounded-2xl bg-[#fafbf8] dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-2 focus-within:border-emerald-500/70 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
             <textarea
               ref={textareaRef}
               rows={1}

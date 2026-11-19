@@ -41,7 +41,15 @@ export interface Message {
   };
 }
 
-export type PlatformType = "Shopee" | "TikTok Shop" | "Lazada" | "WhatsApp";
+export const CHAT_PLATFORMS = [
+  "Shopee",
+  "TikTok Shop",
+  "Lazada",
+  "Tokopedia",
+  "WhatsApp",
+  "Instagram",
+] as const;
+export type PlatformType = (typeof CHAT_PLATFORMS)[number];
 export type ChatPriority = "high" | "medium" | "low";
 export type ChatStatus = "active" | "resolved";
 export type SortOption = "priority" | "newest" | "oldest" | "date";
