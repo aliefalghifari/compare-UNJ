@@ -4,14 +4,13 @@ class BaseHandler:
     def __init__(self, handlers: dict):
         self.handlers = handlers
 
-    def process(self,message:str , intent_result:dict, entity:list[dict]) -> dict:
+    def process(self, intent_result:dict, entity:list[dict]) -> dict:
         if intent_result.get("status") != "classified":
             return {
                 "status" : "uncertain",
                 result : []}
         result = []
-        for item in intent_result:
-            intent = item["intents"]
+        for intent in intent_result["intents"]:
             handler = self.handlers.get(intent)
 
             if handler is None:
@@ -21,5 +20,10 @@ class BaseHandler:
                 })
                 continue
 
-            result = handler.handle(message=message,intent, entities= entity,)
+            response = handler.handle(intent=intent_result, entities= entity)
+            result.append(response)
+        return {
+            "status":"processed",
+            "result":result
+        }
 
