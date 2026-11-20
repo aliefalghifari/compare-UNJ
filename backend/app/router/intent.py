@@ -5,17 +5,20 @@ router = APIRouter(prefix="/intent",tags=["Intent"])
 
 @router.post("/predict",response_model=MessageResponse)
 async def predict_intent(payload:MessageRequest,request:Request):
-    intent = request.app.state.intent_inference
-    entity = request.app.state.entity_inference
+    inference_services = request.app.state.inference_services
     base_handler = request.app.state.base_handler
     response_builder = request.app.state.response_builder
-    intent_result = intent.predict(payload.message)
-    entity_result = entity.predict(payload.message)
-    handler_result = base_handler.process(intent_result=intent_result,entities=entity_result["entities"])
+    inference_result = await inference_services.predict(payload.message)
+    intent_result = inference_result["intent"]
+    entity_result = inference_result["entity"]
+    intents = intent_result["intents"]
+    entities = entity_result["entities"]
+    handler_result = base_handler.process(intent_result=intent_result,entities=entities)
     response_result = response_builder.build(handler_result)
     return {
-    **intent_result,
-    "entities": entity_result["entities"],
-    "handler_results":handler_result,
-    "draft_response":response_result["draft_response"]
-}
+        "intents": intents,
+        "threshold": intent_result["threshold"],
+        "entities": entities,
+        "handler_results": handler_result,
+        "draft_response": response_result.get("draft_response")
+    }
