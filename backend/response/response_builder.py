@@ -55,7 +55,7 @@ class ResponseBuilder:
             message = ("maaf kak, informasi belum dapat kami tampilkan untuk saat ini")
         return {
             "success":True,
-            "draft_reponse":message
+            "draft_response":message
         }
 
     def _format_product(self, product: dict) -> dict:
