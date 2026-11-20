@@ -1,4 +1,4 @@
-from backend.database.supabase_client import supabase
+from database.supabase_client import supabase
 
 class ProductService:
     def get_product(self, product_name:str):

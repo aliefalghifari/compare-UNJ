@@ -1,12 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from backend.services.inference_services import InferenceService
-from backend.response.response_builder import ResponseBuilder
-from backend.app.handlers.product_handler import ProductHandler
-from backend.services.product_services import ProductService
-from backend.app.handlers.base_handler import BaseHandler
-from backend.app.router.intent import router as intent_router
+from services.inference_services import InferenceService
+from response.response_builder import ResponseBuilder
+from app.handlers.product_handler import ProductHandler
+from services.product_services import ProductService
+from app.handlers.base_handler import BaseHandler
+from app.router.intent import router as intent_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
