@@ -13,6 +13,7 @@ export interface UserProfile {
 }
 
 export type MessageStatus = "sent" | "delivered" | "read";
+export type MessageSender = "cs" | "ai_bot" | "customer" | "agent";
 
 export interface MessageProductAttachment {
   title: string;
@@ -24,14 +25,16 @@ export interface MessageProductAttachment {
 
 export interface Message {
   id: string;
-  senderId: string;
+  sessionId?: string;
+  senderId?: string;
   senderName: string;
-  senderRole: "customer" | "cs" | "agent" | "system";
+  senderRole: MessageSender;
   text: string;
   timestamp: string;
-  isIncoming: boolean; // Incoming = from customer / external; false = from user / CS / assistant
+  isIncoming: boolean; // false = CS / User; true = external
   status: MessageStatus;
   detectedIntent?: string;
+  confidenceScore?: number;
   detectedEntities?: { label: string; value: string }[];
   attachment?: {
     type: "product" | "image" | "file";
@@ -41,11 +44,54 @@ export interface Message {
   };
 }
 
-export type PlatformType = "Shopee" | "TikTok Shop" | "Lazada" | "WhatsApp";
+export const CHAT_PLATFORMS = [
+  "Shopee",
+  "TikTok Shop",
+  "Tokopedia",
+  "Lazada",
+  "WhatsApp",
+  "Instagram",
+] as const;
+
+export type DisplayPlatformType = (typeof CHAT_PLATFORMS)[number];
+
+export type SupabasePlatformType =
+  | "shopee"
+  | "tokopedia"
+  | "tiktok_shop"
+  | "lazada"
+  | "whatsapp"
+  | "instagram";
+
+export type PlatformType = DisplayPlatformType | SupabasePlatformType;
 export type ChatPriority = "high" | "medium" | "low";
 export type ChatStatus = "active" | "resolved";
 export type SortOption = "priority" | "newest" | "oldest" | "date";
 
+// Database Record in Supabase chat_sessions
+export interface SupabaseChatSession {
+  id: string;
+  title: string;
+  platform: SupabasePlatformType;
+  priority: ChatPriority;
+  status: ChatStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+// Database Record in Supabase chat_messages
+export interface SupabaseChatMessage {
+  id: string;
+  session_id: string;
+  sender: "cs" | "ai_bot";
+  message_text: string;
+  detected_intent: string | null;
+  confidence_score: number | null;
+  extracted_entities: { label: string; value: string }[] | null;
+  created_at: string;
+}
+
+// UI Chat Session with messages attached
 export interface ChatSession {
   id: string;
   title: string;
@@ -60,7 +106,7 @@ export interface ChatSession {
   pinned?: boolean;
   lastMessage: string;
   lastMessageTime: string;
-  createdAt: string; // ISO string or timestamp
+  createdAt: string;
   updatedAt: string;
   messages: Message[];
   orderInfo?: {

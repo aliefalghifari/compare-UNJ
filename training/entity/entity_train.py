@@ -62,11 +62,11 @@ class Train:
 
             self.optimizer.zero_grad(set_to_none=True)
 
-            logits = self.model(
+            outputs = self.model(
                 input_ids=input_ids,
                 attention_mask=attention_mask
             )
-
+            logits = outputs.logits
             loss = self._calculate_loss(logits, labels)
 
             loss.backward()
@@ -93,11 +93,11 @@ class Train:
 
                 input_ids, attention_mask, labels = self._move_batch(batch)
 
-                logits = self.model(
+                outputs = self.model(
                     input_ids=input_ids,
                     attention_mask=attention_mask
                 )
-
+                logits = outputs.logits
                 loss = self._calculate_loss(logits, labels)
 
                 total_loss += loss.item()

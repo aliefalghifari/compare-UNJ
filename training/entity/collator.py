@@ -5,8 +5,8 @@ class EntityCollator:
     def __call__(self, samples):
         batch = self.processor.process_token(samples)
 
-        return (
-            batch["input_ids"],
-            batch["attention_mask"],
-            batch["labels"]
-        )
+        return {
+            "input_ids":batch["input_ids"],
+            "attention_mask":batch["attention_mask"],
+            "labels":batch["labels"]
+        }
