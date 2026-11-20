@@ -48,7 +48,7 @@ class ResponseBuilder:
         data = handler_result.get("data", [])
         if status == "not_found":
             message = ("maaf kak, produk yang dicari belum berhasil ditemukan"
-                       "Bisa diperiksa kembali nama produknya?")
+                       "\nBisa diperiksa kembali nama produknya?")
 
         elif status == "success":
             products = [
