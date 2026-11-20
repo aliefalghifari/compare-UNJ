@@ -6,7 +6,6 @@ from backend.response.response_builder import ResponseBuilder
 from backend.app.handlers.product_handler import ProductHandler
 from backend.services.product_services import ProductService
 from backend.app.handlers.base_handler import BaseHandler
-from fastapi.middleware.cors import CORSMiddleware
 from backend.app.router.intent import router as intent_router
 
 @asynccontextmanager
