@@ -8,44 +8,34 @@ class ResponseBuilder:
     }
 
     def build(self, handler_result: dict) -> dict:
-        status = self.handler_result.get("status", "error")
+        status = handler_result.get("status", "error")
 
-        response = {
-            "intent": handler_result.get("intent"),
-            "status": status,
-            "message": self.STATUS_MESSAGES.get(
+        if status == "success":
+            return self._build_product_response(handler_result)
+
+        if status == "not_found":
+            return self._build_product_response(handler_result)
+
+        return {
+            "success": False,
+            "draft_response": self.STATUS_MESSAGES.get(
                 status,
-                "Terjadi kesalahan saat memproses permintaan."
+                "Maaf kak, permintaan belum dapat diproses."
             )
         }
 
-        # Pertahankan data hasil handler
-        if "data" in handler_result:
-            response["data"] = handler_result["data"]
+    
 
-        # Informasi yang perlu diklarifikasi
-        if "required" in handler_result:
-            response["required"] = handler_result["required"]
-
-        return response
-
-    def build(self,handler_result:dict):
-        if not self.handler_result.get("succes"):
-            return {
-                "succes":False,
-                "draft_response":None
-            }
-
-    def _build_product_response(self,data:dict):
-        status = self.handler_result.get("status")
-        data = self.handler_result.get("data",[])
+    def _build_product_response(self, handler_result: dict):
+        status = handler_result.get("status")
+        data = handler_result.get("data", [])
         if status == "not_found":
             message = ("maaf kak, produk yang dicari belum berhasil ditemukan"
                        "Bisa diperiksa kembali nama produknya?")
 
         elif status == "success":
             products = [
-                self._formaat_product(product)
+                self._format_product(product)
                 for product in data
             ]
             response = []
