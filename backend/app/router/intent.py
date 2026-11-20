@@ -15,6 +15,7 @@ async def predict_intent(payload:MessageRequest,request:Request):
     response_result = response_builder.build(handler_result)
     return {
     **intent_result,
+    "session_id": payload.session_id,
     "entities": entity_result["entities"],
     "handler_results":handler_result,
     "draft_response":response_result["draft_response"]
