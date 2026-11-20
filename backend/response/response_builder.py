@@ -8,20 +8,37 @@ class ResponseBuilder:
     }
 
     def build(self, handler_result: dict) -> dict:
-        status = handler_result.get("status", "error")
+        results = handler_result.get("result", [])
 
-        if status == "success":
-            return self._build_product_response(handler_result)
+        if not results:
+            return {
+                "success": False,
+                "draft_response": "Maaf kak, permintaan belum dapat diproses."
+            }
 
-        if status == "not_found":
-            return self._build_product_response(handler_result)
+        responses = []
+
+        for result in results:
+            intent = result.get("intent")
+
+            if intent == "product_inquiry":
+                product_response = self._build_product_response(result)
+                responses.append(product_response["draft_response"])
+
+            else:
+                status = result.get("status")
+                message = self.STATUS_MESSAGES.get(
+                    status,
+                    "Maaf kak, permintaan belum dapat diproses."
+                )
+                responses.append(message)
 
         return {
-            "success": False,
-            "draft_response": self.STATUS_MESSAGES.get(
-                status,
-                "Maaf kak, permintaan belum dapat diproses."
-            )
+            "success": any(
+                result.get("status") == "success"
+                for result in results
+            ),
+            "draft_response": "\n\n".join(responses)
         }
 
     
