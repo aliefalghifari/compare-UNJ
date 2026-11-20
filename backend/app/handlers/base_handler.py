@@ -8,9 +8,9 @@ class BaseHandler:
         if intent_result.get("status") != "classified":
             return {
                 "status" : "uncertain",
-                result : []}
+                "result" : []}
         result = []
-        for intent in intent_result["intents"]:
+        for intent in intent_result("intent",[]):
             handler = self.handlers.get(intent)
 
             if handler is None:
@@ -20,7 +20,7 @@ class BaseHandler:
                 })
                 continue
 
-            response = handler.handle(intent=intent_result, entities= entity)
+            response = handler.handle(intent, entity)
             result.append(response)
         return {
             "status":"processed",
