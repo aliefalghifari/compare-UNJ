@@ -23,6 +23,12 @@ import {
   seedInitialSessionsIfEmpty,
   updateChatSession,
 } from "@/services/chat-service";
+import {
+  buildAiReplyText,
+  mapEntitiesToFrontend,
+  pickTopIntent,
+  predictIntent,
+} from "@/services/backend-service";
 
 interface AppContextType {
   // Theme state
@@ -399,70 +405,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     // Trigger AI Typing indicator
     setIsAiTyping(true);
 
-    // Simulated Backend AI prediction & response
-    setTimeout(async () => {
-      const lower = trimmedText.toLowerCase();
-      let replyText =
-        "Query telah dievaluasi oleh backend AI Toko Husin. Respon rekomendasi telah disesuaikan dengan SOP katalog toko.";
-      let detectedIntent = "Pengecekan Umum / FAQ Toko";
-      let detectedEntities: { label: string; value: string }[] | undefined = undefined;
+    // ── Real Backend AI call ─────────────────────────────────────────────
+    try {
+      const backendResult = await predictIntent(trimmedText);
 
-      if (
-        lower.includes("stok") ||
-        lower.includes("ready") ||
-        lower.includes("kurma") ||
-        lower.includes("sukari") ||
-        lower.includes("ajwa")
-      ) {
-        detectedIntent = "Intent: Cek Stok Produk";
-        detectedEntities = [
-          { label: "PRODUK", value: "Kurma Sukari Al-Qassim" },
-          { label: "STATUS GUDANG", value: "Ready 48 Box (1kg)" },
-          { label: "HARGA", value: "Rp 85.000 / Box" },
-        ];
-        replyText =
-          "Hasil Prediksi Backend: Stok Kurma Sukari Al-Qassim kemasan 1kg saat ini tersedia 48 box di rak utama. Produk segar, tanpa pemanis buatan, dan siap dikirim dengan ekstra bubble wrap gratis!";
-      } else if (
-        lower.includes("rusak") ||
-        lower.includes("bocor") ||
-        lower.includes("keluhan") ||
-        lower.includes("komplain") ||
-        lower.includes("ongkir")
-      ) {
-        detectedIntent = "Intent: Eskalasi Keluhan (Tinggi)";
-        detectedEntities = [
-          { label: "KATEGORI", value: "Kerusakan Fisik Barang / Paket Bocor" },
-          { label: "KEBIJAKAN", value: "Garansi 100% Penggantian Baru" },
-          { label: "ACTION", value: "Buka Tiket Resi Pengganti" },
-        ];
-        replyText =
-          "Hasil Prediksi Backend: Keluhan dikategorikan Prioritas Tinggi. Sistem merekomendasikan penerbitan garansi 100% barang baru tanpa biaya tambahan setelah konfirmasi bukti unboxing.";
-      } else if (
-        lower.includes("kirim") ||
-        lower.includes("jadwal") ||
-        lower.includes("pick-up") ||
-        lower.includes("ekspedisi")
-      ) {
-        detectedIntent = "Intent: Kebijakan Pengiriman";
-        detectedEntities = [
-          { label: "CUT-OFF", value: "15.00 WIB" },
-          { label: "KURIR", value: "J&T, SiCepat, Kargo" },
-        ];
-        replyText =
-          "Hasil Prediksi Backend: Batas waktu order reguler adalah pukul 15.00 WIB. Pesanan sebelum cut-off dipastikan berangkat di hari yang sama.";
-      } else if (
-        lower.includes("grosir") ||
-        lower.includes("diskon") ||
-        lower.includes("sajadah")
-      ) {
-        detectedIntent = "Intent: Skema Grosir B2B";
-        detectedEntities = [
-          { label: "MINIMAL ORDER", value: "20 Pcs (1 Kodi)" },
-          { label: "POTONGAN", value: "Diskon 15% + Pouch Gratis" },
-        ];
-        replyText =
-          "Hasil Prediksi Backend: Untuk kuantiti 20 pcs ke atas, sistem mengizinkan diskon grosir 15% plus bonus pouch sajadah per buah.";
-      }
+      const replyText = buildAiReplyText(backendResult);
+      const detectedIntent = pickTopIntent(backendResult);
+      const detectedEntities =
+        backendResult.entities.length > 0
+          ? mapEntitiesToFrontend(backendResult.entities)
+          : undefined;
 
       let agentReply: Message = {
         id: `temp-agent-${Date.now()}`,
@@ -484,7 +436,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           sender: "ai_bot",
           messageText: replyText,
           detectedIntent,
-          confidenceScore: 0.95,
+          confidenceScore: backendResult.intents?.[0]?.confidence ?? 0,
           extractedEntities: detectedEntities,
         });
         agentReply = savedAgentMsg;
@@ -506,10 +458,44 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           return c;
         })
       );
+    } catch (backendErr) {
+      // ── Fallback: backend offline / error ─────────────────────────────
+      console.warn("Backend unreachable, using fallback response:", backendErr);
 
+      const fallbackText =
+        "⚠️ Backend AI tidak dapat dihubungi saat ini. Pastikan server FastAPI sudah berjalan di http://localhost:8000.";
+
+      const fallbackMsg: Message = {
+        id: `temp-agent-${Date.now()}`,
+        sessionId: activeChat.id,
+        senderId: "ai-bot",
+        senderName: "AI Assistant Toko Husin",
+        senderRole: "agent",
+        text: fallbackText,
+        timestamp: formatTime(new Date().toISOString()),
+        isIncoming: false,
+        status: "read",
+        detectedIntent: "Backend Offline",
+      };
+
+      setChatSessions((latest) =>
+        latest.map((c) => {
+          if (c.id === activeChat.id) {
+            return {
+              ...c,
+              lastMessage: fallbackText,
+              lastMessageTime: fallbackMsg.timestamp,
+              updatedAt: new Date().toISOString(),
+              messages: [...c.messages, fallbackMsg],
+            };
+          }
+          return c;
+        })
+      );
+    } finally {
       // Stop AI Typing indicator
       setIsAiTyping(false);
-    }, 1200);
+    }
   };
 
   // Filter & Sort computation
