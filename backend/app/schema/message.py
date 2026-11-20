@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 
 class MessageRequest(BaseModel):
     message: str = Field(min_length=1)
+    session_id: str | None = None
 
 
 class EntitySpan(BaseModel):
@@ -24,6 +25,7 @@ class HandlerResponse(BaseModel):
 
 
 class MessageResponse(BaseModel):
+    session_id: str | None = None
     intents: list[IntentPrediction]
     threshold: float
     entities: list[EntitySpan] = Field(default_factory=list)

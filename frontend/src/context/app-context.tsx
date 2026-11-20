@@ -407,7 +407,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     // ── Real Backend AI call ─────────────────────────────────────────────
     try {
-      const backendResult = await predictIntent(trimmedText);
+      const backendResult = await predictIntent(trimmedText, activeChat.id);
 
       const replyText = buildAiReplyText(backendResult);
       const detectedIntent = pickTopIntent(backendResult);
