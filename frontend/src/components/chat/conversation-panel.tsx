@@ -18,6 +18,8 @@ import {
   CheckCircle2,
   CircleDot,
   ArrowUp,
+  Copy,
+  Check,
   Tag,
   PackageCheck,
   Bot,
@@ -38,6 +40,7 @@ export function ConversationPanel() {
   } = useApp();
 
   const [inputPrompt, setInputPrompt] = useState("");
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -92,6 +95,18 @@ export function ConversationPanel() {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
+    }
+  };
+
+  const handleCopyMessage = async (messageId: string, text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedMessageId(messageId);
+      window.setTimeout(() => {
+        setCopiedMessageId((currentId) => currentId === messageId ? null : currentId);
+      }, 1800);
+    } catch {
+      showToast({ icon: "error", title: "Pesan gagal disalin" });
     }
   };
 
@@ -336,6 +351,18 @@ export function ConversationPanel() {
                       </div>
                     )}
                   </div>
+                  {!isCustomerOrCS && (
+                    <button
+                      type="button"
+                      onClick={() => handleCopyMessage(msg.id, msg.text)}
+                      aria-label={copiedMessageId === msg.id ? "Pesan tersalin" : "Salin pesan AI"}
+                      title={copiedMessageId === msg.id ? "Tersalin" : "Salin pesan"}
+                      className="mt-1 inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-[11px] text-slate-400 transition-colors hover:bg-slate-200/70 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                    >
+                      {copiedMessageId === msg.id ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+                      <span>{copiedMessageId === msg.id ? "Tersalin" : "Salin"}</span>
+                    </button>
+                  )}
                 </div>
               </div>
             );
