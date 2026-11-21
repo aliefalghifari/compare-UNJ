@@ -1,4 +1,4 @@
-from services.product_services import ProductService
+from backend.services.product_services import ProductService
 
 class ProductHandler:
     def __init__(self,product_service:ProductService):
