@@ -463,7 +463,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       console.warn("Backend unreachable, using fallback response:", backendErr);
 
       const fallbackText =
-        "⚠️ Backend AI tidak dapat dihubungi saat ini. Pastikan server FastAPI sudah berjalan di http://localhost:8000.";
+        "⚠️ Backend AI tidak dapat dihubungi saat ini. Silakan coba lagi beberapa saat.";
 
       const fallbackMsg: Message = {
         id: `temp-agent-${Date.now()}`,

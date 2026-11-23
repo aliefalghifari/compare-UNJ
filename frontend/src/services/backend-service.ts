@@ -1,11 +1,12 @@
 /**
  * backend-service.ts
- * Handles all HTTP calls to the FastAPI backend (http://localhost:8000).
+ * Handles all HTTP calls to the deployed FastAPI backend.
  * The base URL is read from the Next.js env variable NEXT_PUBLIC_BACKEND_API_URL.
  */
 
 const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:8000";
+  process.env.NEXT_PUBLIC_BACKEND_API_URL ||
+  "https://backend-rho-eight-h0zrugiinh.vercel.app";
 
 // ─── Types matching backend schema (message.py) ────────────────────────────
 
