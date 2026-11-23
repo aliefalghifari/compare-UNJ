@@ -28,7 +28,6 @@ export interface BackendHandlerResponse {
 }
 
 export interface BackendPredictResponse {
-  session_id?: string | null;
   intents: BackendIntentPrediction[];
   threshold: number;
   entities: BackendEntitySpan[];
@@ -40,21 +39,17 @@ export interface BackendPredictResponse {
 
 /**
  * POST /intent/predict
- * Sends a CS message along with the session_id to the AI backend.
+ * Sends a CS message to the AI backend and returns the full prediction result.
  *
  * @throws Error when the backend is unreachable or returns a non-OK status
  */
 export async function predictIntent(
-  message: string,
-  sessionId?: string
+  message: string
 ): Promise<BackendPredictResponse> {
   const res = await fetch(`${BACKEND_URL}/intent/predict`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      message,
-      session_id: sessionId || null,
-    }),
+    body: JSON.stringify({ message }),
   });
 
   if (!res.ok) {
