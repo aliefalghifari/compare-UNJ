@@ -1,318 +1,312 @@
-BantuIn — UMKM Operational Assistant
+# BantuIn — Asisten Operasional UMKM
 
-Sistem pendukung operasional UMKM berbasis Natural Language Processing (NLP) dan analisis data.
+> Sistem pendukung operasional UMKM berbasis **Natural Language Processing (NLP)** dan **analisis data**.
 
-BantuIn merupakan proyek pengembangan sistem pendukung operasional UMKM yang berfokus pada dua permasalahan utama: efisiensi layanan pelanggan dan analisis profitabilitas produk.
+![Status](https://img.shields.io/badge/status-dalam%20pengembangan-yellow)
+![Backend](https://img.shields.io/badge/backend-FastAPI-009688)
+![Frontend](https://img.shields.io/badge/frontend-Next.js-000000)
+![NLP](https://img.shields.io/badge/NLP-IndoBERT-blue)
 
-Sistem ini dirancang untuk membantu staf Customer Service (CS) dalam memahami serta memproses pesan pelanggan, sekaligus membantu pemilik usaha memperoleh gambaran keuntungan produk berdasarkan data transaksi dan biaya operasional.
-
-BantuIn dikembangkan dengan mengintegrasikan model NLP, backend API, dan basis data dalam satu sistem yang modular.
-
-«Proyek ini dikembangkan sebagai bagian dari COMPARE 2026 dan masih berada dalam tahap pengembangan.»
-
----
-
-Tujuan Proyek
-
-BantuIn memiliki dua fokus pengembangan utama:
-
-1. Customer Service Assistant: mengurangi pekerjaan repetitif staf CS melalui klasifikasi pesan, ekstraksi informasi, dan rekomendasi jawaban berdasarkan informasi toko.
-2. Product Profitability Analytics: membantu pemilik UMKM memahami keuntungan produk secara lebih transparan dengan memperhitungkan modal, biaya marketplace, voucher, ongkos kirim, dan komponen biaya lainnya.
-
-Sistem ini dirancang sebagai alat bantu operasional, bukan pengganti keputusan staf maupun pemilik usaha.
+BantuIn dikembangkan sebagai bagian dari **COMPARE 2026** dan masih dalam tahap pengembangan.
 
 ---
 
-Fitur dan Modul
+## Daftar Isi
 
-1. Customer Service Assistant
-
-Modul ini berfokus pada pemrosesan pesan pelanggan menggunakan model NLP dan business logic pada backend.
-
-Fitur yang telah diimplementasikan:
-
-- Klasifikasi intent pesan pelanggan.
-- Ekstraksi entitas dari pesan menggunakan model NLP.
-- Integrasi model intent classification dan entity extraction melalui backend.
-- Routing permintaan berdasarkan intent yang teridentifikasi.
-- Validasi entitas sebelum menjalankan operasi bisnis.
-- Handler untuk permintaan informasi produk.
-- Pencarian informasi produk melalui Supabase.
-- Penyusunan draft jawaban berdasarkan hasil pemrosesan backend.
-
-Pengembangan selanjutnya:
-
-- Penyelesaian handler untuk berbagai jenis intent pelanggan, seperti:
-  - "product_inquiry"
-  - "shipping_schedule"
-  - "shipping_issue"
-  - "order_cancellation"
-  - "address_change"
-  - Intent lain yang relevan dengan kebutuhan operasional toko.
-- Pengembangan mekanisme klarifikasi otomatis ketika informasi pelanggan belum lengkap.
-- Penanganan permintaan yang tidak didukung atau memiliki informasi yang belum dapat dipastikan.
-- Integrasi seluruh handler dengan business service dan basis data yang sesuai.
-- Pengembangan pengelolaan informasi toko, termasuk katalog, stok, dan aturan pengiriman.
-- Penyempurnaan response builder agar rekomendasi jawaban lebih konsisten dan sesuai konteks.
-
-2. Pengembangan Model NLP
-
-BantuIn menggunakan pendekatan NLP berbasis IndoBERT untuk memahami pesan pelanggan.
-
-Saat ini, sistem menggunakan dua model dengan tanggung jawab berbeda:
-
-- Intent Classification: mengidentifikasi tujuan atau maksud pelanggan ketika mengirimkan pesan.
-- Entity Extraction: menemukan informasi penting dalam pesan, seperti nama produk dan informasi pendukung lainnya.
-
-Kedua model diintegrasikan melalui backend untuk menghasilkan informasi terstruktur yang dapat digunakan oleh business logic.
-
-Target pengembangan model:
-
-- Meningkatkan akurasi klasifikasi intent.
-- Meningkatkan kemampuan ekstraksi entitas.
-- Memperbaiki pemahaman terhadap bahasa informal dan percakapan sehari-hari.
-- Menangani singkatan, variasi penulisan, dan kesalahan ketik.
-- Meningkatkan kemampuan model dalam membedakan pesan dengan maksud yang serupa.
-- Memperluas dataset pelatihan dengan variasi pesan yang lebih representatif.
-- Melakukan evaluasi menggunakan precision, recall, F1-score, dan confusion matrix.
-- Mengurangi kesalahan prediksi yang dapat menyebabkan kesalahan pemrosesan permintaan pelanggan.
-
-3. Product Profitability Analytics
-
-Modul ini ditujukan untuk membantu pemilik UMKM memahami profitabilitas produk berdasarkan data penjualan dan biaya.
-
-Pendapatan yang tinggi tidak selalu mencerminkan keuntungan yang tinggi. Potongan marketplace, voucher, modal produk, biaya pengiriman, dan retur dapat memengaruhi keuntungan akhir.
-
-Fitur yang direncanakan:
-
-- Input data transaksi secara manual.
-- Impor data transaksi melalui berkas.
-- Pencatatan modal produk.
-- Pencatatan biaya marketplace.
-- Pencatatan voucher dan diskon yang ditanggung penjual.
-- Pencatatan biaya pengiriman dan retur.
-- Perhitungan pendapatan bersih.
-- Perhitungan keuntungan dan margin keuntungan.
-- Analisis profitabilitas berdasarkan produk.
-- Perbandingan keuntungan antar-marketplace.
-- Filter analisis berdasarkan periode.
-- Validasi data transaksi dan komponen biaya yang belum lengkap.
-
-Perhitungan utama:
-
-Pendapatan bersih:
-
-"Pendapatan Penjualan - Potongan dan Biaya Penjualan"
-
-Keuntungan:
-
-"Pendapatan Bersih - Modal Produk - Biaya Operasional Terkait"
-
-Sistem dirancang agar komponen perhitungan dapat ditelusuri sehingga pengguna dapat memahami faktor yang memengaruhi keuntungan produk.
+- [Latar Belakang](#latar-belakang)
+- [Tujuan Proyek](#tujuan-proyek)
+- [Fitur dan Modul](#fitur-dan-modul)
+- [Arsitektur Sistem](#arsitektur-sistem)
+- [Teknologi](#teknologi)
+- [Struktur Proyek](#struktur-proyek)
+- [Menjalankan Proyek](#menjalankan-proyek)
+- [Roadmap](#roadmap)
+- [Dokumentasi](#dokumentasi)
+- [Status Proyek](#status-proyek)
+- [Lisensi](#lisensi)
 
 ---
 
-Arsitektur Sistem
+## Latar Belakang
 
-BantuIn menggunakan pendekatan modular dengan pemisahan tanggung jawab antara frontend, backend, model NLP, dan layanan bisnis.
+Pelaku UMKM yang berjualan lewat marketplace sering menghadapi dua masalah operasional:
 
-              CUSTOMER MESSAGE
-                      |
-                      v
-               NEXT.JS FRONTEND
-                      |
-                      v
-                FASTAPI BACKEND
-                      |
-                      v
-                INFERENCE SERVICE
-                      |
-                      v
-             HUGGING FACE INFERENCE
-                      |
-              +-------+-------+
-              |               |
-              v               v
-          INTENT           ENTITY
-      CLASSIFICATION      EXTRACTION
-              |               |
-              +-------+-------+
-                      |
-                      v
-                BASE HANDLER
-                      |
-                      v
-                INTENT ROUTING
-                      |
-                      v
-              SPECIFIC HANDLER
-                      |
-                      v
-              BUSINESS SERVICE
-                      |
-                      v
-                   SUPABASE
-                      |
-                      v
-               HANDLER RESULTS
-                      |
-                      v
-              RESPONSE BUILDER
-                      |
-                      v
-               DRAFT RESPONSE
-                      |
-                      v
-                FRONTEND
+1. **Layanan pelanggan memakan waktu.** Staf Customer Service (CS) harus membalas pesan yang sama berulang kali, seperti menanyakan stok, jadwal pengiriman, atau pembatalan pesanan.
+2. **Keuntungan sulit dipantau.** Omzet yang tinggi belum tentu berarti untung tinggi, karena potongan marketplace, voucher, modal, ongkos kirim, dan retur ikut mengurangi keuntungan akhir.
 
-Arsitektur tersebut memungkinkan pengembangan model NLP dan business logic dilakukan secara terpisah.
+BantuIn hadir untuk membantu kedua hal tersebut dalam satu sistem.
 
-Model bertanggung jawab memahami pesan pelanggan, sedangkan backend bertanggung jawab memvalidasi informasi, menentukan tindakan, dan mengakses data bisnis.
+## Tujuan Proyek
+
+BantuIn memiliki dua fokus utama:
+
+| Fokus | Tujuan |
+|---|---|
+| **Customer Service Assistant** | Mengurangi pekerjaan repetitif staf CS lewat klasifikasi pesan, ekstraksi informasi, dan rekomendasi jawaban berdasarkan informasi toko. |
+| **Product Profitability Analytics** | Membantu pemilik usaha memahami keuntungan setiap produk secara transparan dengan memperhitungkan modal, biaya marketplace, voucher, ongkos kirim, dan biaya lainnya. |
+
+> **Catatan:** BantuIn dirancang sebagai **alat bantu**, bukan pengganti keputusan staf maupun pemilik usaha. Jawaban yang dihasilkan berupa *draft* yang tetap ditinjau oleh manusia.
 
 ---
 
-Teknologi yang Digunakan
+## Fitur dan Modul
 
-Komponen| Teknologi
-Frontend| Next.js, React, TypeScript
-Styling| Tailwind CSS
-Backend| Python, FastAPI
-Machine Learning| PyTorch
-NLP| IndoBERT, Transformers
-Model Deployment| Hugging Face Spaces
-HTTP Communication| HTTPX
-Database| Supabase
-API Communication| REST API, JSON
+### 1. Customer Service Assistant
+
+Memproses pesan pelanggan menggunakan model NLP dan business logic di backend.
+
+**Sudah diimplementasikan**
+
+- [x] Klasifikasi intent pesan pelanggan
+- [x] Ekstraksi entitas dari pesan (misalnya nama produk)
+- [x] Integrasi model intent dan entity melalui backend
+- [x] Routing permintaan berdasarkan intent
+- [x] Validasi entitas sebelum menjalankan operasi bisnis
+- [x] Handler untuk permintaan informasi produk
+- [x] Pencarian informasi produk melalui Supabase
+- [x] Penyusunan draft jawaban dari hasil pemrosesan backend
+
+**Rencana pengembangan**
+
+- [ ] Handler untuk intent lain: `product_inquiry`, `shipping_schedule`, `shipping_issue`, `order_cancellation`, `address_change`, dan intent lain sesuai kebutuhan toko
+- [ ] Klarifikasi otomatis saat informasi pelanggan belum lengkap
+- [ ] Penanganan permintaan yang tidak didukung atau belum bisa dipastikan
+- [ ] Integrasi seluruh handler dengan business service dan basis data
+- [ ] Pengelolaan informasi toko (katalog, stok, aturan pengiriman)
+- [ ] Penyempurnaan response builder agar rekomendasi jawaban konsisten dan sesuai konteks
+
+### 2. Pengembangan Model NLP
+
+BantuIn menggunakan **IndoBERT** dengan dua model yang bertanggung jawab berbeda:
+
+| Model | Fungsi |
+|---|---|
+| **Intent Classification** | Mengidentifikasi maksud pelanggan saat mengirim pesan. |
+| **Entity Extraction** | Menemukan informasi penting dalam pesan, seperti nama produk dan detail pendukung. |
+
+Keduanya diintegrasikan lewat backend untuk menghasilkan informasi terstruktur bagi business logic.
+
+**Target pengembangan model**
+
+- Meningkatkan akurasi klasifikasi intent dan kemampuan ekstraksi entitas
+- Memahami bahasa informal, singkatan, variasi penulisan, dan salah ketik
+- Membedakan pesan dengan maksud yang mirip
+- Memperluas dataset dengan variasi pesan yang lebih representatif
+- Mengevaluasi model dengan precision, recall, F1-score, dan confusion matrix
+- Mengurangi kesalahan prediksi yang dapat menyebabkan salah proses
+
+### 3. Product Profitability Analytics
+
+Membantu pemilik UMKM memahami profitabilitas produk dari data penjualan dan biaya.
+
+**Fitur yang direncanakan**
+
+- Input transaksi manual dan impor dari berkas
+- Pencatatan modal produk, biaya marketplace, voucher/diskon yang ditanggung penjual, biaya pengiriman, dan retur
+- Perhitungan pendapatan bersih, keuntungan, dan margin
+- Analisis profitabilitas per produk dan perbandingan antar-marketplace
+- Filter berdasarkan periode
+- Validasi data transaksi dan komponen biaya yang belum lengkap
+
+**Rumus utama**
+
+```text
+Pendapatan Bersih = Pendapatan Penjualan - Potongan dan Biaya Penjualan
+Keuntungan        = Pendapatan Bersih - Modal Produk - Biaya Operasional Terkait
+```
+
+Setiap komponen perhitungan dirancang agar dapat ditelusuri, sehingga pengguna paham faktor apa saja yang memengaruhi keuntungan produk.
 
 ---
 
-Struktur Proyek
+## Arsitektur Sistem
 
+BantuIn memakai pendekatan modular: frontend, backend, model NLP, dan layanan bisnis dipisahkan tanggung jawabnya. Model bertugas **memahami** pesan, sedangkan backend bertugas **memvalidasi, menentukan tindakan, dan mengakses data**. Dengan begitu, pengembangan model dan business logic bisa dilakukan secara terpisah.
+
+```text
+Pesan Pelanggan
+      │
+      ▼
+Next.js Frontend
+      │
+      ▼
+FastAPI Backend
+      │
+      ▼
+Inference Service ──► Hugging Face Inference
+                          │
+              ┌───────────┴───────────┐
+              ▼                       ▼
+     Intent Classification     Entity Extraction
+              └───────────┬───────────┘
+                          ▼
+                    Base Handler
+                          │
+                          ▼
+                    Intent Routing
+                          │
+                          ▼
+                   Specific Handler
+                          │
+                          ▼
+                   Business Service ◄──► Supabase
+                          │
+                          ▼
+                    Handler Results
+                          │
+                          ▼
+                   Response Builder
+                          │
+                          ▼
+                    Draft Response
+                          │
+                          ▼
+                       Frontend
+```
+
+---
+
+## Teknologi
+
+| Komponen | Teknologi |
+|---|---|
+| Frontend | Next.js, React, TypeScript |
+| Styling | Tailwind CSS |
+| Backend | Python, FastAPI |
+| Machine Learning | PyTorch |
+| NLP | IndoBERT, Transformers |
+| Deployment Model | Hugging Face Spaces |
+| Komunikasi HTTP | HTTPX |
+| Database | Supabase |
+| Komunikasi API | REST API, JSON |
+
+---
+
+## Struktur Proyek
+
+```text
 bantuin/
 ├── backend/
 │   ├── app/
-│   │   ├── handlers/       # Pemrosesan berdasarkan intent
-│   │   ├── router/         # Routing API
-│   │   └── schema/         # Skema request dan response
-│   ├── database/           # Koneksi database
-│   ├── response/           # Penyusunan draft jawaban
-│   ├── services/           # Inference dan business services
-│   └── main.py             # Entry point FastAPI
-│
+│   │   ├── handlers/    # Pemrosesan berdasarkan intent
+│   │   ├── router/      # Routing API
+│   │   └── schema/      # Skema request dan response
+│   ├── database/        # Koneksi database
+│   ├── response/        # Penyusunan draft jawaban
+│   ├── services/        # Inference dan business services
+│   └── main.py          # Entry point FastAPI
 ├── docs/
-│   └── PRD.md              # Product Requirements Document
-│
-├── frontend/               # Aplikasi Next.js
-│
-├── training/               # Resource pengembangan model
-│
+│   └── PRD.md           # Product Requirements Document
+├── frontend/            # Aplikasi Next.js
+├── training/            # Resource pengembangan model
 └── README.md
+```
 
 ---
 
-Menjalankan Proyek
+## Menjalankan Proyek
 
-Persyaratan
+### Persyaratan
 
-- Python 3.10 atau versi yang kompatibel dengan dependensi.
-- Node.js dan npm.
-- Akun Hugging Face.
-- Proyek Supabase.
+- Python 3.10 atau versi yang kompatibel dengan dependensi
+- Node.js dan npm
+- Akun Hugging Face
+- Proyek Supabase
 
-1. Clone Repository
+### 1. Clone repository
 
+```bash
 git clone https://github.com/aliefalghifari/compare-UNJ.git
-
 cd compare-UNJ
+```
 
-2. Menyiapkan Backend
+### 2. Siapkan backend
 
+```bash
 python -m venv .venv
+```
 
 Aktifkan virtual environment:
 
+```powershell
 # Windows PowerShell
 .venv\Scripts\Activate.ps1
+```
+
+```bash
+# macOS / Linux
+source .venv/bin/activate
+```
 
 Instal dependensi:
 
+```bash
 pip install -r backend/requirements.txt
+```
 
-3. Konfigurasi Environment Variables
+### 3. Atur environment variables
 
-Buat file ".env" di dalam direktori "backend/".
+Buat file `.env` di dalam direktori `backend/`:
 
+```env
 HF_SPACE_URL=your_huggingface_space_url
 HF_TOKEN=your_huggingface_token
 
 SUPABASE_URL=your_supabase_url
 SUPABASE_SECRET_KEY=your_supabase_secret_key
+```
 
-Sesuaikan konfigurasi dengan kredensial layanan yang digunakan.
+> **Penting:** jangan unggah file `.env` atau kredensial pribadi ke repository publik.
 
-Jangan mengunggah file ".env" atau kredensial pribadi ke repository publik.
-
-4. Menjalankan Backend
+### 4. Jalankan backend
 
 Dari direktori utama proyek:
 
+```bash
 uvicorn backend.main:app --reload
+```
 
-API tersedia melalui:
+- API: <http://localhost:8000>
+- Dokumentasi API: <http://localhost:8000/docs>
 
-"http://localhost:8000"
-
-Dokumentasi API:
-
-"http://localhost:8000/docs"
-
-5. Menjalankan Frontend
+### 5. Jalankan frontend
 
 Buka terminal baru:
 
+```bash
 cd frontend
-
 npm install
-
 npm run dev
+```
 
-Aplikasi dapat diakses melalui:
-
-"http://localhost:3000"
-
----
-
-Roadmap Pengembangan
-
-Pengembangan BantuIn dilakukan secara bertahap dengan mempertimbangkan kebutuhan sistem dan kesiapan setiap komponennya.
-
-Tahap| Fokus Pengembangan
-1| Integrasi model intent classification dan entity extraction
-2| Pengembangan arsitektur backend dan handler
-3| Penyelesaian handler untuk seluruh intent yang dibutuhkan
-4| Peningkatan kualitas dataset dan performa model NLP
-5| Pengembangan mekanisme klarifikasi dan rekomendasi jawaban
-6| Pengembangan modul analisis profitabilitas
-7| Integrasi seluruh modul dan pengujian sistem
-
-Roadmap ini bersifat dinamis dan dapat berubah mengikuti hasil evaluasi selama pengembangan.
+Aplikasi dapat diakses di <http://localhost:3000>.
 
 ---
 
-Dokumentasi
+## Roadmap
 
-Dokumentasi kebutuhan produk dapat dilihat melalui:
+Pengembangan dilakukan bertahap sesuai kebutuhan dan kesiapan tiap komponen. Roadmap ini dinamis dan dapat berubah mengikuti hasil evaluasi.
 
-- "Product Requirements Document (PRD)" (docs/PRD.md)
+| Tahap | Fokus | Status |
+|:---:|---|:---:|
+| 1 | Integrasi model intent classification dan entity extraction | ✅ |
+| 2 | Pengembangan arsitektur backend dan handler | 🔄 |
+| 3 | Penyelesaian handler untuk seluruh intent yang dibutuhkan | ⏳ |
+| 4 | Peningkatan kualitas dataset dan performa model NLP | ⏳ |
+| 5 | Mekanisme klarifikasi dan rekomendasi jawaban | ⏳ |
+| 6 | Pengembangan modul analisis profitabilitas | ⏳ |
+| 7 | Integrasi seluruh modul dan pengujian sistem | ⏳ |
 
-Status Proyek
+✅ selesai · 🔄 sedang berjalan · ⏳ direncanakan
 
-BantuIn masih dalam tahap pengembangan. Implementasi saat ini berfokus pada integrasi model NLP, pengembangan backend orchestration, dan handler untuk memproses permintaan pelanggan.
+## Dokumentasi
 
-Pengembangan berikutnya mencakup penyelesaian seluruh handler, peningkatan kemampuan model dalam memahami pesan pelanggan, serta implementasi modul Product Profitability Analytics.
+- [Product Requirements Document (PRD)](docs/PRD.md)
 
----
+## Status Proyek
 
-Lisensi
+BantuIn masih dalam tahap pengembangan. Saat ini fokusnya adalah integrasi model NLP, orkestrasi backend, dan handler untuk memproses permintaan pelanggan. Tahap berikutnya mencakup penyelesaian seluruh handler, peningkatan pemahaman model terhadap pesan pelanggan, dan implementasi modul Product Profitability Analytics.
 
-Belum terdapat lisensi resmi yang ditetapkan pada repository ini. Penggunaan dan distribusi ulang kode mengikuti ketentuan pemilik repository.
+## Lisensi
+
+Belum ada lisensi resmi yang ditetapkan pada repository ini. Penggunaan dan distribusi ulang kode mengikuti ketentuan pemilik repository. resmi yang ditetapkan pada repository ini. Penggunaan dan distribusi ulang kode mengikuti ketentuan pemilik repository.
